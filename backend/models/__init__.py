@@ -7,5 +7,15 @@ from backend.models.document import Document
 from backend.models.experiment import Experiment
 from backend.models.ground_truth import GroundTruthValidation
 from backend.models.job import Job
+from backend.models.record import ScientificRecord
+from backend.models.assessment import ScientificAssessment
 
-__all__ = ["Base", "Document", "Experiment", "GroundTruthValidation", "Job"]
+__all__ = [
+    "Base",
+    "Document",
+    "Experiment",
+    "GroundTruthValidation",
+    "Job",
+    "ScientificRecord",
+    "ScientificAssessment",
+]

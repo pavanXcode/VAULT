@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VAULT — Safe Scientific Research Assistant & Model Factory</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              900: '#14532d',
+            },
+            surface: {
+              800: '#1e293b',
+              900: '#0f172a',
+              950: '#020617',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    .animate-pulse-subtle { animation: pulse-subtle 2s infinite; }
+  </style>
+</head>
+<body class="bg-surface-950 text-slate-100 min-h-screen font-sans flex flex-col">
+
+  <!-- Header / Navigation Bar -->
+  <header class="border-b border-slate-800 bg-surface-900 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-emerald-500/20">
+          V
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            VAULT
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Offline-First</span>
+          </h1>
+          <p class="text-xs text-slate-400">Safe Scientific Assistant & Model Harness</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex space-x-1 sm:space-x-2">
+        <button onclick="switchTab('assistant')" id="tab-assistant" class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors bg-emerald-600 text-white shadow">
+          🔬 Assistant & Memory
+        </button>
+        <button onclick="switchTab('runs')" id="tab-runs" class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors text-slate-300 hover:text-white hover:bg-slate-800">
+          ⚡ Pipeline Runs
+        </button>
+        <button onclick="switchTab('eval')" id="tab-eval" class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors text-slate-300 hover:text-white hover:bg-slate-800">
+          ⚖️ Eval & Release
+        </button>
+        <button onclick="switchTab('new-model')" id="tab-new-model" class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors text-slate-300 hover:text-white hover:bg-slate-800">
+          🌱 New Model
+        </button>
+      </nav>
+
+      <!-- System Health Badge -->
+      <div class="hidden sm:flex items-center space-x-2 text-xs">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="system-status-text" class="text-slate-400">Connecting...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+    <!-- PAGE 4: Research Assistant & Scientific Memory -->
+    <section id="page-assistant" class="space-y-6">
+      
+      <!-- Banner / Principles -->
+      <div class="bg-gradient-to-r from-emerald-950/40 via-surface-900 to-slate-900 border border-emerald-500/20 rounded-xl p-4 sm:p-6 shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 class="text-base sm:text-lg font-semibold text-white">Immutable Scientific Memory & Live Review</h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            Raw laboratory records are preserved indefinitely by SHA-256 content hashes. All verification findings and retrospective audits are append-only.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="loadSampleScenario(1)" class="text-xs px-2.5 py-1.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition">
+            Load Flawed Calc (15mg/0.5L)
+          </button>
+          <button onclick="loadSampleScenario(2)" class="text-xs px-2.5 py-1.5 rounded-md bg-sky-500/10 text-sky-400 border border-sky-500/30 hover:bg-sky-500/20 transition">
+            Load Alt Method (Bioavail)
+          </button>
+          <button onclick="loadSampleScenario(3)" class="text-xs px-2.5 py-1.5 rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/30 hover:bg-purple-500/20 transition">
+            Load Unknown Method
+          </button>
+        </div>
+      </div>
+
+      <!-- Split Layout: Ingest Form & Interactive Assistant -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Laboratory Record Ingestion & Review Form (5 cols) -->
+        <div class="lg:col-span-5 bg-surface-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+            <h3 class="font-medium text-slate-200 text-sm flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+              Upload / Ingest Scientific Record
+            </h3>
+            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Live Verifier</span>
+          </div>
+
+          <form id="record-form" onsubmit="handleRecordSubmit(event)" class="space-y-3 text-xs">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-400 mb-1">Record ID</label>
+                <input type="text" id="rec-id" required class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 focus:outline-none focus:border-emerald-500 font-mono text-xs" value="REC-EXP-2026-001">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Method ID</label>
+                <input type="text" id="rec-method" required class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 focus:outline-none focus:border-emerald-500 font-mono text-xs" value="MTH-STD-01">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-400 mb-1">Mass (mg)</label>
+                <input type="number" step="any" id="rec-mass" required class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 focus:outline-none focus:border-emerald-500 font-mono text-xs" value="15.0">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Volume (L)</label>
+                <input type="number" step="any" id="rec-volume" required class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 focus:outline-none focus:border-emerald-500 font-mono text-xs" value="0.5">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-400 mb-1">Reported Conc. (mg/L)</label>
+                <input type="number" step="any" id="rec-reported" required class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 focus:outline-none focus:border-emerald-500 font-mono text-xs" value="3.0">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Threshold (mg/L)</label>
+                <input type="number" step="any" id="rec-threshold" required class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 focus:outline-none focus:border-emerald-500 font-mono text-xs" value="10.0">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-400 mb-1">Original Verdict</label>
+                <select id="rec-verdict" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 focus:outline-none focus:border-emerald-500 text-xs">
+                  <option value="PASS">PASS</option>
+                  <option value="FAIL">FAIL</option>
+                  <option value="NEEDS_REVIEW">NEEDS_REVIEW</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Available Fraction (0-1)</label>
+                <input type="number" step="any" id="rec-fraction" placeholder="Optional (e.g. 0.3)" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 focus:outline-none focus:border-emerald-500 font-mono text-xs">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-400 mb-1">Calibration Expiration</label>
+                <input type="date" id="rec-cal-exp" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 focus:outline-none focus:border-emerald-500 font-mono text-xs" value="2030-01-01">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Source SOPs / Refs</label>
+                <input type="text" id="rec-refs" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 focus:outline-none focus:border-emerald-500 font-mono text-xs" value="SOP-ENV-101, INST-BAL-04">
+              </div>
+            </div>
+
+            <div class="flex gap-2 pt-2">
+              <button type="button" onclick="handleRecordReview()" class="flex-1 py-2 px-3 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition text-xs border border-slate-700">
+                🔍 Review Only
+              </button>
+              <button type="submit" class="flex-1 py-2 px-3 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition text-xs shadow-md shadow-emerald-600/30">
+                💾 Ingest & Lock
+              </button>
+            </div>
+          </form>
+
+          <!-- Finding / Warning Alert Box -->
+          <div id="review-result-container" class="hidden text-xs border rounded-lg p-3 space-y-2">
+            <!-- Dynamic Injection -->
+          </div>
+        </div>
+
+        <!-- Right Column: Assistant Chat & Chronological Findings (7 cols) -->
+        <div class="lg:col-span-7 flex flex-col space-y-4">
+
+          <!-- Scientific Memory Explorer -->
+          <div class="bg-surface-900 border border-slate-800 rounded-xl p-4 shadow-lg space-y-3">
+            <div class="flex justify-between items-center">
+              <h3 class="font-medium text-slate-200 text-sm flex items-center gap-2">
+                <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                Scientific Memory Ledger
+              </h3>
+              <button onclick="refreshRecordsList()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+                <span>🔄</span> Refresh
+              </button>
+            </div>
+            <div id="records-list" class="max-h-48 overflow-y-auto space-y-2 text-xs">
+              <div class="text-slate-500 py-4 text-center">Loading ingested scientific records...</div>
+            </div>
+          </div>
+
+          <!-- Chronological Finding History Timeline (Modal/Card) -->
+          <div id="history-container" class="hidden bg-surface-900 border border-slate-800 rounded-xl p-4 shadow-lg space-y-3">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+              <h4 id="history-title" class="font-medium text-xs text-slate-200">Append-Only History</h4>
+              <button onclick="document.getElementById('history-container').classList.add('hidden')" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
+            </div>
+            <div id="history-timeline" class="space-y-2 max-h-56 overflow-y-auto text-xs">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Research Assistant Chat Interface -->
+          <div class="bg-surface-900 border border-slate-800 rounded-xl p-4 shadow-lg flex-1 flex flex-col justify-between space-y-3 min-h-[300px]">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span class="text-xs font-semibold text-slate-200">Research Assistant (Evidence-Grounded)</span>
+              </div>
+              <span id="chat-model-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">vault-model-mock</span>
+            </div>
+
+            <!-- Messages Stream -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto space-y-3 p-1 max-h-72 text-xs">
+              <div class="flex gap-2.5 items-start">
+                <div class="w-6 h-6 rounded bg-emerald-950 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">A</div>
+                <div class="bg-slate-800/80 rounded-lg p-3 text-slate-300 max-w-[85%] border border-slate-700/50">
+                  Welcome, Pawan. I am the VAULT Scientific Research Assistant. You can query me on verified records or test new candidate experiments against our evidence rules.
+                </div>
+              </div>
+            </div>
+
+            <!-- Input Bar -->
+            <form onsubmit="handleAssistantChat(event)" class="flex gap-2 pt-2 border-t border-slate-800">
+              <input type="text" id="chat-input" placeholder="Ask about verified records, discrepancies, or threshold compliance..." class="flex-1 bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+              <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-xs font-medium transition shadow-md">
+                Ask
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 2: Pipeline Runs -->
+    <section id="page-runs" class="hidden space-y-6">
+      <div class="bg-surface-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div>
+            <h2 class="font-semibold text-base text-white">Pipeline Execution Runs</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Asynchronous tool worker jobs: CuratorKIT, SafeTune, and AuditKIT</p>
+          </div>
+          <button onclick="refreshJobsList()" class="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs border border-slate-700">
+            🔄 Refresh Jobs
+          </button>
+        </div>
+
+        <div id="jobs-table-container" class="overflow-x-auto text-xs">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
+                <th class="py-2.5 px-3">Job ID</th>
+                <th class="py-2.5 px-3">Tool</th>
+                <th class="py-2.5 px-3">Status</th>
+                <th class="py-2.5 px-3">Created</th>
+                <th class="py-2.5 px-3">Completed</th>
+                <th class="py-2.5 px-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="jobs-table-body" class="divide-y divide-slate-800 font-mono">
+              <tr>
+                <td colspan="6" class="py-6 text-center text-slate-500 font-sans">Loading pipeline execution jobs...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 3: Evaluation & Release -->
+    <section id="page-eval" class="hidden space-y-6">
+      <div class="bg-surface-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
+        <div class="border-b border-slate-800 pb-3">
+          <h2 class="font-semibold text-base text-white">Frozen Evaluation Criteria & Release Gate</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Model promotion policy: M0 (untouched), M1 (plain LoRA), M2 (evidence-gated), M3 (SafeTune hardened)</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+          <div class="bg-slate-950/70 border border-slate-800 rounded-lg p-3 space-y-1">
+            <span class="text-slate-400 uppercase text-[10px] font-bold">M0 Baseline</span>
+            <p class="font-semibold text-sm text-slate-200">Tiny Aya Global</p>
+            <p class="text-[11px] text-slate-400">Untouched foundation model baseline</p>
+            <div class="mt-2 text-emerald-400 font-mono text-[10px]">Ready for AuditKIT</div>
+          </div>
+          <div class="bg-slate-950/70 border border-slate-800 rounded-lg p-3 space-y-1">
+            <span class="text-slate-400 uppercase text-[10px] font-bold">M1 Plain LoRA</span>
+            <p class="font-semibold text-sm text-slate-200">Standard SFT</p>
+            <p class="text-[11px] text-slate-400">Trained on raw laboratory samples</p>
+            <div class="mt-2 text-amber-400 font-mono text-[10px]">Awaiting Rohit weights</div>
+          </div>
+          <div class="bg-slate-950/70 border border-slate-800 rounded-lg p-3 space-y-1">
+            <span class="text-slate-400 uppercase text-[10px] font-bold">M2 Gated LoRA</span>
+            <p class="font-semibold text-sm text-slate-200">Evidence Curation</p>
+            <p class="text-[11px] text-slate-400">Trained on verifier-approved data</p>
+            <div class="mt-2 text-slate-500 font-mono text-[10px]">Planned</div>
+          </div>
+          <div class="bg-slate-950/70 border border-slate-800 rounded-lg p-3 space-y-1">
+            <span class="text-slate-400 uppercase text-[10px] font-bold">M3 SafeTune</span>
+            <p class="font-semibold text-sm text-slate-200">Hardened Checkpoint</p>
+            <p class="text-[11px] text-slate-400">Safety preservation & unlearning</p>
+            <div class="mt-2 text-slate-500 font-mono text-[10px]">Planned</div>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-950 border border-slate-800 rounded-lg space-y-2 text-xs">
+          <div class="flex justify-between items-center">
+            <span class="font-semibold text-slate-300">Release Gate Policy Checks:</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">PENDING AUDIT</span>
+          </div>
+          <ul class="space-y-1 text-slate-400 text-[11px]">
+            <li>• Checkpoint SHA-256 match: <span class="text-slate-500">Not Tested</span></li>
+            <li>• Domain Task Accuracy threshold (> 85%): <span class="text-slate-500">Not Tested</span></li>
+            <li>• Safety Compliance & Zero Harmful Drift: <span class="text-slate-500">Not Tested</span></li>
+            <li>• Human Officer Signoff: <span class="text-slate-500">Required</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 1: New Model -->
+    <section id="page-new-model" class="hidden space-y-6">
+      <div class="bg-surface-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4 max-w-2xl mx-auto">
+        <div class="border-b border-slate-800 pb-3">
+          <h2 class="font-semibold text-base text-white">Configure & Launch Model Training</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Submit fine-tuning or evaluation parameters to Rohit's training adapter</p>
+        </div>
+
+        <form onsubmit="handleNewModelSubmit(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block text-slate-400 mb-1">Model Target</label>
+            <select id="nm-model" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-2 text-slate-100 text-xs">
+              <option value="tiny-aya-global">Tiny Aya Global (M0)</option>
+              <option value="tiny-aya-lora-m1">Tiny Aya Plain LoRA (M1)</option>
+              <option value="tiny-aya-gated-m2">Tiny Aya Evidence-Gated LoRA (M2)</option>
+              <option value="tiny-aya-safetune-m3">Tiny Aya SafeTune Hardened (M3)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-slate-400 mb-1">Dataset Reference</label>
+            <input type="text" id="nm-dataset" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-2 text-slate-100 font-mono text-xs" value="data/synthetic/records.jsonl">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-400 mb-1">Training Tool</label>
+              <select id="nm-tool" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-2 text-slate-100 text-xs">
+                <option value="safetune">SafeTune</option>
+                <option value="curatorkit">CuratorKIT</option>
+                <option value="auditkit">AuditKIT</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Action / Mode</label>
+              <input type="text" id="nm-action" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-2 text-slate-100 font-mono text-xs" value="dataset_check">
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" class="w-full py-2.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition text-xs shadow-md">
+              Submit Pipeline Job
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Script Logic -->
+  <script src="/static/app.js"></script>
+</body>
+</html>

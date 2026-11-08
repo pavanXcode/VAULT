@@ -27,3 +27,11 @@ def test_root_endpoint(client: TestClient):
     assert data["status"] == "online"
     assert data["offline_mode"] is True
     assert data["api_prefix"] == "/api"
+
+
+def test_ui_dashboard_endpoint(client: TestClient):
+    """Verify that the frontend UI is properly served at /ui."""
+    response = client.get("/ui")
+    assert response.status_code == 200
+    assert "VAULT" in response.text
+    assert "Research Assistant" in response.text

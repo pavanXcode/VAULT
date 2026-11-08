@@ -104,7 +104,53 @@ def install_ground_truth_triggers(target_engine=None) -> None:
                     """
                 )
             )
-            logger.info("Installed SQLite immutability triggers on ground_truth_validations")
+            # Scientific Records immutability triggers
+            conn.execute(
+                text(
+                    """
+                    CREATE TRIGGER IF NOT EXISTS trg_prevent_records_update
+                    BEFORE UPDATE ON records
+                    BEGIN
+                        SELECT RAISE(ABORT, 'IMMUTABILITY VIOLATION: records are immutable and cannot be updated.');
+                    END;
+                    """
+                )
+            )
+            conn.execute(
+                text(
+                    """
+                    CREATE TRIGGER IF NOT EXISTS trg_prevent_records_delete
+                    BEFORE DELETE ON records
+                    BEGIN
+                        SELECT RAISE(ABORT, 'IMMUTABILITY VIOLATION: records are immutable and cannot be deleted.');
+                    END;
+                    """
+                )
+            )
+            # Scientific Assessments immutability triggers (append-only)
+            conn.execute(
+                text(
+                    """
+                    CREATE TRIGGER IF NOT EXISTS trg_prevent_assessments_update
+                    BEFORE UPDATE ON assessments
+                    BEGIN
+                        SELECT RAISE(ABORT, 'IMMUTABILITY VIOLATION: assessments are append-only and cannot be updated.');
+                    END;
+                    """
+                )
+            )
+            conn.execute(
+                text(
+                    """
+                    CREATE TRIGGER IF NOT EXISTS trg_prevent_assessments_delete
+                    BEFORE DELETE ON assessments
+                    BEGIN
+                        SELECT RAISE(ABORT, 'IMMUTABILITY VIOLATION: assessments are append-only and cannot be deleted.');
+                    END;
+                    """
+                )
+            )
+            logger.info("Installed SQLite immutability triggers on ground_truth_validations, records, and assessments")
 
         elif dialect == "postgresql":
             conn.execute(

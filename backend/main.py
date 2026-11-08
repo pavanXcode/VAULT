@@ -178,6 +178,21 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 # Mount unified API Router under /api
 app.include_router(api_router, prefix="/api")
 
+# Mount Frontend Static Assets & Dashboard Route
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, HTMLResponse
+
+frontend_path = (Path(__file__).parent.parent / "frontend").resolve()
+if frontend_path.exists():
+    app.mount("/static", StaticFiles(directory=str(frontend_path)), name="static")
+
+    @app.get("/ui", response_class=HTMLResponse, tags=["UI"], summary="VAULT Web Dashboard")
+    def serve_ui():
+        """Serves the VAULT Research Assistant & Model Factory web interface."""
+        index_file = frontend_path / "index.html"
+        return FileResponse(str(index_file))
+
 
 @app.get("/", tags=["Root"])
 def root():
@@ -188,5 +203,6 @@ def root():
         "status": "online",
         "offline_mode": settings.offline_mode,
         "docs_url": "/docs",
+        "ui_url": "/ui",
         "api_prefix": "/api",
     }

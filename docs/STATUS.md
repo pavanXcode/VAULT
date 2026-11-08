@@ -11,7 +11,18 @@
 
 - **Git Branch:** `feat/harness-ui`
 - **Core Backend:** FastAPI with document upload, experiment tracking, asynchronous tool execution (AuditKIT, SafeTune, CuratorKIT), and local LLM client
-- **Test Suite:** 53 passed, 1 skipped, 0 failed
+- **Scientific Records & Memory (COMPLETE):**
+  - Immutable raw laboratory records (`records` table) under SHA-256 content hashes
+  - Append-only verification assessment ledger (`assessments` table)
+  - Four mandatory scientific verification scenarios (arithmetic mismatch, valid alternative methods, unknown methods, and expired calibrations) verified and passing
+  - Dual-layer immutability enforcement: ORM lifecycle event listeners and SQLite database triggers prevent any silent UPDATE or DELETE
+  - API endpoints: `/api/records/review`, `/api/records/ingest`, `/api/records/{id}/history`, `/api/records`, `/api/assistant/review-record`, `/api/assistant/ask`
+- **Interactive UI Dashboard (COMPLETE):**
+  - Live single-page interface mounted at `http://127.0.0.1:8000/ui`
+  - 4 Navigation Tabs: 🔬 Assistant & Memory, ⚡ Pipeline Runs, ⚖️ Eval & Release, 🌱 New Model
+  - Pre-loaded sample buttons for the mandatory scenarios
+  - Chronological history timeline view
+- **Test Suite:** 62 passed, 1 skipped, 0 failed
 - **Active Integrations:**
   - AuditKIT runner: Available
   - SafeTune runner: Available

@@ -8,6 +8,7 @@ from backend.services.experiment_service import ExperimentService
 from backend.services.ground_truth_service import GroundTruthService
 from backend.services.llm_service import LocalLLMClient
 from backend.services.tool_execution_service import ToolExecutionService
+from backend.services.record_service import RecordService
 
 __all__ = [
     "get_health_status",
@@ -17,4 +18,5 @@ __all__ = [
     "GroundTruthService",
     "LocalLLMClient",
     "ToolExecutionService",
+    "RecordService",
 ]

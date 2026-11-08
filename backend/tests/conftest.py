@@ -46,6 +46,8 @@ def db_session():
             ev.set()
     with test_engine.begin() as conn:
         conn.execute(text("DROP TRIGGER IF EXISTS trg_prevent_ground_truth_delete"))
+        conn.execute(text("DROP TRIGGER IF EXISTS trg_prevent_records_delete"))
+        conn.execute(text("DROP TRIGGER IF EXISTS trg_prevent_assessments_delete"))
         for table in reversed(Base.metadata.sorted_tables):
             conn.execute(table.delete())
     install_ground_truth_triggers(test_engine)

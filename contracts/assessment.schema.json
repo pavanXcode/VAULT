@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ScientificAssessment",
+  "description": "Schema for append-only scientific verification finding events in VAULT.",
+  "type": "object",
+  "required": [
+    "finding_id",
+    "record_id",
+    "source_hash",
+    "verifier_version",
+    "timestamp",
+    "status",
+    "issues",
+    "evidence",
+    "original_verdict"
+  ],
+  "properties": {
+    "finding_id": {
+      "type": "string",
+      "description": "Unique identifier of the verification assessment event"
+    },
+    "record_id": {
+      "type": "string",
+      "description": "Identifier of the verified scientific record"
+    },
+    "source_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 digest of original raw record payload"
+    },
+    "verifier_version": {
+      "type": "string",
+      "description": "Version of the verification rule engine"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp of the assessment"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["checks_passed", "flagged", "needs_review"],
+      "description": "Verification outcome status"
+    },
+    "issues": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of flagged discrepancies, arithmetic errors, or expired SOPs"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rule": { "type": "string" },
+          "expected": {},
+          "actual": {},
+          "notes": { "type": "string" }
+        }
+      },
+      "description": "Structured supporting evidence for each check or finding"
+    },
+    "derived": {
+      "type": "object",
+      "description": "Engine-computed derived quantities (e.g. calculated_concentration)"
+    },
+    "original_verdict": {
+      "type": "string",
+      "enum": ["PASS", "FAIL", "NEEDS_REVIEW"],
+      "description": "Preserved original verdict from the record without modification"
+    },
+    "review_state": {
+      "type": "string",
+      "enum": ["automated", "peer_reviewed", "disputed", "superseded"],
+      "default": "automated"
+    },
+    "supersedes_id": {
+      "type": ["string", "null"],
+      "description": "Finding ID of a previous assessment superseded by this new evidence"
+    }
+  },
+  "additionalProperties": false
+}

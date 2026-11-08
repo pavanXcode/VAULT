@@ -22,6 +22,12 @@ from backend.schemas.job import (
     JobResultResponse,
 )
 from backend.schemas.llm import LLMMessage, LLMGenerateRequest, LLMGenerateResponse
+from backend.schemas.record import ScientificRecordInput, ScientificRecordResponse
+from backend.schemas.assessment import (
+    EvidenceItem,
+    ScientificAssessmentResponse,
+    RecordHistoryResponse,
+)
 
 __all__ = [
     "HealthResponse",
@@ -44,4 +50,9 @@ __all__ = [
     "LLMMessage",
     "LLMGenerateRequest",
     "LLMGenerateResponse",
+    "ScientificRecordInput",
+    "ScientificRecordResponse",
+    "EvidenceItem",
+    "ScientificAssessmentResponse",
+    "RecordHistoryResponse",
 ]

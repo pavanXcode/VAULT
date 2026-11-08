@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ScientificRecord",
+  "description": "Schema for immutable scientific laboratory records in VAULT.",
+  "type": "object",
+  "required": [
+    "record_id",
+    "mass_mg",
+    "volume_l",
+    "reported_mg_per_l",
+    "threshold_mg_per_l",
+    "method_id",
+    "threshold_measurand",
+    "original_verdict"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "description": "Unique identifier of the laboratory experiment record"
+    },
+    "mass_mg": {
+      "type": "number",
+      "description": "Measured substance mass in milligrams"
+    },
+    "volume_l": {
+      "type": "number",
+      "description": "Solution volume in liters"
+    },
+    "reported_mg_per_l": {
+      "type": "number",
+      "description": "Reported concentration in mg/L"
+    },
+    "threshold_mg_per_l": {
+      "type": "number",
+      "description": "Regulatory or safety limit threshold in mg/L"
+    },
+    "method_id": {
+      "type": "string",
+      "description": "Identifier of the measurement and calculation methodology"
+    },
+    "threshold_measurand": {
+      "type": "string",
+      "description": "Target measurand name (e.g. total_concentration, available_fraction)"
+    },
+    "original_verdict": {
+      "type": "string",
+      "enum": ["PASS", "FAIL", "NEEDS_REVIEW"],
+      "description": "Verdict submitted by the researcher at observation time"
+    },
+    "available_fraction": {
+      "type": ["number", "null"],
+      "description": "Availability factor when method calculates bioavailable or available fraction"
+    },
+    "calibration_date": {
+      "type": ["string", "null"],
+      "description": "Timestamp or date of last instrument calibration"
+    },
+    "calibration_valid_until": {
+      "type": ["string", "null"],
+      "description": "Expiration timestamp or date of instrument calibration"
+    },
+    "source_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "References to SOPs, instrument IDs, or protocol documents"
+    }
+  },
+  "additionalProperties": true
+}
