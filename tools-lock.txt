@@ -1,0 +1,5 @@
+﻿VAULT tool repository lock
+Repository | Commit SHA | URL
+CuratorKIT | dd9e835301fcddc74a37501d9e207a5a060d209f | https://github.com/Lexsi-Labs/CuratorKIT.git
+SafeTune | 3901a9f48a88984a181c8c9493be2d3a20ab160f | https://github.com/Lexsi-Labs/SafeTune.git
+AuditKIT | 71316da345784ff220d5ed59337441a59ab31526 | https://github.com/Lexsi-Labs/AuditKIT.git

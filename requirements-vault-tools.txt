@@ -1,0 +1,3 @@
+﻿git+https://github.com/Lexsi-Labs/CuratorKIT.git@dd9e835301fcddc74a37501d9e207a5a060d209f
+git+https://github.com/Lexsi-Labs/SafeTune.git@3901a9f48a88984a181c8c9493be2d3a20ab160f
+git+https://github.com/Lexsi-Labs/AuditKIT.git@71316da345784ff220d5ed59337441a59ab31526
