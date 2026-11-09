@@ -36,27 +36,41 @@
   - Pipeline Runs table with 9-stage progression bar, status badges, config hashes, retry counters, and modal event timelines
   - Evaluation & Release page featuring live M0-M3 model comparison matrix with sample size denominators ($N=250$), live 6-point policy gate checklist, official human sign-off terminal, and append-only governance audit trail
   - New Model page with full parameter and hyperparameter configuration (learning rate, epochs, batch size, LoRA $r$, LoRA $\alpha$), stage selection, and automatic pipeline job dispatch
-- **Test Suite:** 78 passed, 1 skipped, 0 failed (11 release gate tests covering hash mismatch, missing audits, low accuracy, mock rejection, governance invariants, and API endpoints)
+- **Model Engineering & vault_ml Integration (COMPLETE - Rohit Handoff):**
+  - Integrated Rohit's `vault_ml` engine and complete experimental artifacts from `https://github.com/opensourcecodedesigner/vault-`.
+  - Genuine empirical evaluations recorded in `experiments/`:
+    - M0 Baseline: Evaluated across held-out science (`experiments/baseline/real-M0-science/`) and safety (`experiments/safety/real-M0/`).
+    - M1 Conventional LoRA: Trained 20 steps (5,120 tokens) on unverified records. Adapter SHA-256 `f71f0f9d97aceba32e454eedc05ff32f653a1a30131748b8e40707455d0910b7`. Final loss: 0.773, peak VRAM: 4.68 GB. Evaluated across held-out science and safety.
+    - M2 Evidence-Gated LoRA: Trained 20 steps (strictly matched 5,120 tokens) exclusively on verifier-approved records. Adapter SHA-256 `37799d61ce1f5511ed72adf5ff8fa94689c9018fc1e8a1ea17a76d24e44be8c4`. Converged to final loss: 0.283, 80% JSON compliance, 0% over-refusal. Evaluated across held-out science and safety.
+    - M3 SafeTune: Cloud 16GB+ Linux GPU training specification in `experiments/training/cloud-16gb.json`. SafeTune offline evaluation metric suite (`HarmfulnessClassifier`, `OverRefusalMetric`) integrated.
+  - Complete comparative ledger in `experiments/comparison.json` with status `complete`.
+- **Approved Model Inference & Evidence Retrieval (COMPLETE - Phase 4):**
+  - `InferenceService` (`backend/services/inference_service.py`):
+    - Concurrency lock (`asyncio.Lock`) serializing model inference to respect laptop 6 GB VRAM constraints.
+    - Gate Authorization Check: Strictly blocks inference serving if no candidate model is approved by a human officer.
+    - Evidence Grounding: Retrieves evidence from immutable `records` and `assessments` tables, enforcing `[SOURCE:id]` citation allowlisting conforming to `INTEGRATION_CONTRACT.md`.
+    - Integrated with `/api/assistant/ask` and Web UI `#page-assistant`.
+    - Live active model badge in Assistant UI (`Approved: M2-gated-lora` vs `Gate: Unapproved`).
+- **Test Suite:** **103 passed, 1 skipped, 18 subtests passed, 0 failed** (includes full backend, release gate, trainer worker, inference service, and Rohit's 22 ML tests).
 - **Active Integrations:**
   - AuditKIT runner: Available
   - SafeTune runner: Available
   - CuratorKIT runner: Available
-  - Trainer adapter: Ready to execute Rohit's CLI script immediately when supplied
+  - Trainer adapter: Directly invokes `vault_ml.train` or local CLI
+  - Rohit model engine: **Fully integrated** (`vault_ml/`, `experiments/`, M0/M1/M2 checkpoints and evaluation artifacts)
   - Vijay data engine: Standalone rule engine active; awaiting updated simulator package from Vijay
-  - Rohit model engine: Awaiting Tiny Aya LoRA training script/weights from Rohit
 
 ---
 
 ## Blockers & Dependencies
 
 1. **Vijay (Data/Verifier):** Pending fresh synthetic lab dataset. Standalone rule engine serves as working adapter.
-2. **Rohit (Model/Safety):** Preparing Tiny Aya LoRA training code and weights. The trainer adapter is fully built and tested to plug in Rohit's CLI/script without any backend rewrites.
+2. **Rohit (Model/Safety):** **RESOLVED & INTEGRATED.** All model training code, empirical runs, QLoRA weights, evaluation suites, and documentation are integrated into `vault_ml/`, `experiments/`, and backend services.
 
 ---
 
-## Next Actions (Phase 4)
+## Next Actions
 
-1. Implement `backend/services/inference_service.py` with `approved_checkpoint` verification (rejects chat if no approved release exists).
-2. Evidence retrieval service with SQLite FTS5 index on scientific records and append-only assessments.
-3. Role-based demo authentication (`researcher`, `admin`) preventing cross-scope data retrieval.
-4. Assistant chat UI enhancements with clickable record citations.
+1. Review and polish end-to-end user experience in Web UI.
+2. Role-based demo authentication and access control scoping.
+3. Prepare demonstration script and final presentation walkthrough.

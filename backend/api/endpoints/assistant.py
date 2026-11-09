@@ -108,23 +108,20 @@ async def assistant_ask(
                 f"[Record {r.record_id} | Hash: {r.content_hash[:8]} | Method: {r.method_id} | Original Verdict: {r.original_verdict} | Latest Status: {history.latest_status}]"
             )
 
-    # Build prompt with grounded context
-    context_str = "\n".join(context_blocks) if context_blocks else "No records currently in memory."
-    prompt = (
-        f"You are the VAULT Scientific Research Assistant. Answer the researcher's query using the verified records below.\n\n"
-        f"Verified Scientific Records:\n{context_str}\n\n"
-        f"Researcher Query: {payload.query}\n\n"
-        f"Answer with explicit citations to record IDs and their verification status:"
-    )
+    # Ingest query via InferenceService with Release Gate Governance
+    from backend.services.inference_service import inference_service
 
-    llm_req = LLMGenerateRequest(prompt=prompt, max_tokens=300)
-    llm_client = LocalLLMClient()
-    llm_resp = await llm_client.generate(llm_req)
+    inf_resp = await inference_service.generate_response(
+        db=db,
+        question=payload.query,
+        record_id=payload.record_scope[0] if payload.record_scope else None,
+        caller_id="assistant-api",
+    )
 
     from datetime import datetime, timezone
     return AssistantAskResponse(
-        reply=llm_resp.content,
-        evidence_citations=citations,
-        model_version=f"{llm_resp.model} ({llm_resp.mode})",
+        reply=inf_resp.get("answer", ""),
+        evidence_citations=inf_resp.get("evidence", citations),
+        model_version=f"{inf_resp.get('model_id') or 'Unapproved'} (Release: {inf_resp.get('release_id') or 'None'})",
         timestamp=datetime.now(timezone.utc).isoformat(),
     )

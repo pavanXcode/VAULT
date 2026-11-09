@@ -98,43 +98,63 @@ class TrainerWorkerRunner(BaseToolRunner):
         training_out = output_dir / "checkpoints"
         training_out.mkdir(parents=True, exist_ok=True)
 
-        # Check if Rohit's real training script is specified and exists on disk
-        script_candidates = [
-            Path(parameters.get("training_script", "")),
-            Path(settings.upload_dir).parent.parent / "model_engine" / "train.py",
-            Path(settings.upload_dir).parent.parent / "scripts" / "train_adapter.py",
-        ]
+        # Check if real training execution is requested and script exists
+        workspace_root = Path(__file__).resolve().parent.parent.parent
+        explicit_script = parameters.get("training_script")
+        execute_real = bool(parameters.get("execute_real") or parameters.get("mode") == "real" or explicit_script)
+
         real_script_path = None
-        for candidate in script_candidates:
-            if candidate and candidate.is_file():
-                real_script_path = candidate
-                break
+        if execute_real:
+            script_candidates = [
+                Path(explicit_script) if explicit_script else None,
+                workspace_root / "vault_ml" / "train.py",
+                workspace_root / "scripts" / "train_adapter.py",
+            ]
+            for candidate in script_candidates:
+                if candidate and candidate.is_file():
+                    real_script_path = candidate
+                    break
 
         # ---------------------------------------------------------
-        # Case A: Real Model Lead Training Script Found
+        # Case A: Real Model Lead Training Script Found & Requested
         # ---------------------------------------------------------
         if real_script_path:
             logger.info(f"Executing real training script: {real_script_path}")
             config_file = output_dir / "training_config.json"
             config_file.write_text(json.dumps(parameters, indent=2), encoding="utf-8")
 
-            cmd = [
-                sys.executable,
-                str(real_script_path),
-                "--config",
-                str(config_file),
-                "--output-dir",
-                str(training_out),
-                "--job-id",
-                job_id,
-            ]
+            # Support vault_ml CLI argument structure
+            if "vault_ml" in str(real_script_path):
+                variant = "M1" if "m1" in str(model_name).lower() else "M2" if "m2" in str(model_name).lower() else "smoke"
+                cmd = [
+                    sys.executable,
+                    "-m",
+                    "vault_ml.train",
+                    "--variant",
+                    parameters.get("variant", variant),
+                    "--steps",
+                    str(parameters.get("steps", 2)),
+                    "--output-root",
+                    str(training_out),
+                ]
+            else:
+                cmd = [
+                    sys.executable,
+                    str(real_script_path),
+                    "--config",
+                    str(config_file),
+                    "--output-dir",
+                    str(training_out),
+                    "--job-id",
+                    job_id,
+                ]
 
             process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                cwd=str(real_script_path.parent),
+                cwd=str(workspace_root),
             )
 
             stdout_lines = []
@@ -178,6 +198,11 @@ class TrainerWorkerRunner(BaseToolRunner):
 
             # Strict Invariant: Checkpoint MUST physically exist
             expected_adapter = training_out / "adapter_model.safetensors"
+            if not expected_adapter.exists():
+                found_adapters = list(training_out.rglob("adapter_model.safetensors"))
+                if found_adapters:
+                    expected_adapter = found_adapters[0]
+
             if not expected_adapter.exists():
                 return ToolRunResult(
                     tool_name=self.tool_name,

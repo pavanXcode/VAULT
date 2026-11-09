@@ -29,7 +29,7 @@ function switchTab(tabId) {
   }
 }
 
-// Health Status Polling
+// Health Status Polling & Active Model Badge
 async function checkHealth() {
   const statusEl = document.getElementById('system-status-text');
   try {
@@ -45,6 +45,27 @@ async function checkHealth() {
   } catch (err) {
     statusEl.textContent = 'Offline';
     statusEl.className = 'text-red-400 font-mono text-[11px]';
+  }
+  updateActiveModelBadge();
+}
+
+async function updateActiveModelBadge() {
+  const badge = document.getElementById('chat-model-badge');
+  if (!badge) return;
+  try {
+    const res = await fetch(`${API_BASE}/models/releases/active`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.serving_permitted && data.active_release) {
+        badge.textContent = `Approved: ${data.active_release.model_id}`;
+        badge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+      } else {
+        badge.textContent = 'Gate: Unapproved';
+        badge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30';
+      }
+    }
+  } catch (err) {
+    // Silent fail
   }
 }
 

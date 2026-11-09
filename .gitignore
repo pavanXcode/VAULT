@@ -48,6 +48,10 @@ data/uploads/
 .env
 !.env.example
 
+# Cache
+.cache/
+
+
 # IDE & OS
 .vscode/
 .idea/
