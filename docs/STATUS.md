@@ -51,20 +51,23 @@
     - Evidence Grounding: Retrieves evidence from immutable `records` and `assessments` tables, enforcing `[SOURCE:id]` citation allowlisting conforming to `INTEGRATION_CONTRACT.md`.
     - Integrated with `/api/assistant/ask` and Web UI `#page-assistant`.
     - Live active model badge in Assistant UI (`Approved: M2-gated-lora` vs `Gate: Unapproved`).
-- **Test Suite:** **103 passed, 1 skipped, 18 subtests passed, 0 failed** (includes full backend, release gate, trainer worker, inference service, and Rohit's 22 ML tests).
+- **Test Suite:** **111 passed, 1 skipped, 18 subtests passed, 0 failed** (includes full backend, release gate, trainer worker, inference service, auth and scoping, crash recovery, golden demo flow, and Rohit's 22 ML tests).
 - **Active Integrations:**
   - AuditKIT runner: Available
   - SafeTune runner: Available
   - CuratorKIT runner: Available
   - Trainer adapter: Directly invokes `vault_ml.train` or local CLI
   - Rohit model engine: **Fully integrated** (`vault_ml/`, `experiments/`, M0/M1/M2 checkpoints and evaluation artifacts)
-  - Vijay data engine: Standalone rule engine active; awaiting updated simulator package from Vijay
+  - Vijay data engine: Standalone rule engine active; awaiting updated simulator package from Vijay (hook `register_custom_verifier` ready)
 
 ---
 
 ## Blockers & Dependencies
 
-1. **Vijay (Data/Verifier):** Pending fresh synthetic lab dataset. Standalone rule engine serves as working adapter.
+1. **Vijay (Data/Verifier):**
+   - *Current State:* Platform is 100% operational and test-passing today using the built-in deterministic verification rule engine (`RecordService.verify_record_logic`).
+   - *When Vijay's Work is Needed:* A fresh synthetic lab dataset or external simulator script from Vijay is needed before the final demonstration code freeze (scheduled for Nov 11–12).
+   - *Handoff Mechanism:* Vijay's script or verifier function plugs directly into `register_custom_verifier()` in `backend/services/record_service.py` with zero architectural refactoring required.
 2. **Rohit (Model/Safety):** **RESOLVED & INTEGRATED.** All model training code, empirical runs, QLoRA weights, evaluation suites, and documentation are integrated into `vault_ml/`, `experiments/`, and backend services.
 
 ---
@@ -72,5 +75,4 @@
 ## Next Actions
 
 1. Review and polish end-to-end user experience in Web UI.
-2. Role-based demo authentication and access control scoping.
-3. Prepare demonstration script and final presentation walkthrough.
+2. Prepare demonstration script and final presentation walkthrough.

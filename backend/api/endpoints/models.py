@@ -160,7 +160,7 @@ def evaluate_model_release(
 
     # Use provided payload or fall back to catalog defaults
     if payload:
-        data = payload.dict()
+        data = payload.model_dump()
     else:
         data = {
             "model_id": model_entry["model_id"],

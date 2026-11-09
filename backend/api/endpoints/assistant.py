@@ -14,6 +14,7 @@ from backend.schemas.assessment import ScientificAssessmentResponse
 from backend.schemas.llm import LLMGenerateRequest
 from backend.services.record_service import RecordService
 from backend.services.llm_service import LocalLLMClient
+from backend.services.auth_service import UserSession, get_current_user
 
 router = APIRouter(prefix="/assistant", tags=["Research Assistant"])
 
@@ -80,33 +81,15 @@ def assistant_review_record(
 async def assistant_ask(
     payload: AssistantAskRequest,
     db: Session = Depends(get_db),
+    user: UserSession = Depends(get_current_user),
 ):
     """
     Queries the VAULT research assistant.
     Grounds answers in immutable scientific records and append-only findings.
+    Enforces role-based authorization and data scoping.
     """
     citations: List[Dict[str, Any]] = []
     context_blocks: List[str] = []
-
-    if payload.include_scientific_memory:
-        query = db.query(ScientificRecord)
-        if payload.record_scope:
-            query = query.filter(ScientificRecord.record_id.in_(payload.record_scope))
-        records = query.order_by(ScientificRecord.id.desc()).limit(10).all()
-
-        for r in records:
-            history = RecordService.get_record_history(r.record_id, db)
-            citations.append({
-                "record_id": r.record_id,
-                "content_hash": r.content_hash,
-                "method_id": r.method_id,
-                "original_verdict": r.original_verdict,
-                "latest_status": history.latest_status,
-                "issues_count": len(history.assessments[-1].issues) if history.assessments else 0,
-            })
-            context_blocks.append(
-                f"[Record {r.record_id} | Hash: {r.content_hash[:8]} | Method: {r.method_id} | Original Verdict: {r.original_verdict} | Latest Status: {history.latest_status}]"
-            )
 
     # Ingest query via InferenceService with Release Gate Governance
     from backend.services.inference_service import inference_service
@@ -115,7 +98,8 @@ async def assistant_ask(
         db=db,
         question=payload.query,
         record_id=payload.record_scope[0] if payload.record_scope else None,
-        caller_id="assistant-api",
+        caller_id=f"user:{user.username}",
+        user=user,
     )
 
     from datetime import datetime, timezone

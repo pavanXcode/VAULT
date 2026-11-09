@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 from backend.models.record import ScientificRecord
 from backend.models.assessment import ScientificAssessment
 from backend.services.release_gate import release_gate_service
+from backend.services.auth_service import UserSession, check_record_scope, DEFAULT_ANONYMOUS_USER
 
 logger = logging.getLogger("vault.inference")
 
@@ -61,11 +62,14 @@ class InferenceService:
         query: str,
         record_id: Optional[str] = None,
         max_sources: int = 5,
+        user: Optional[UserSession] = None,
     ) -> List[Dict[str, Any]]:
         """
         Retrieves relevant evidence from immutable laboratory records
         and append-only assessment history.
+        Enforces backend role-based data scoping.
         """
+        active_user = user or DEFAULT_ANONYMOUS_USER
         records_query = db.query(ScientificRecord)
         if record_id:
             records_query = records_query.filter(ScientificRecord.record_id == record_id)
@@ -80,14 +84,21 @@ class InferenceService:
                 from sqlalchemy import or_
                 records_query = records_query.filter(or_(*filters))
 
-        records = records_query.order_by(ScientificRecord.id.desc()).limit(max_sources).all()
+        records = records_query.order_by(ScientificRecord.id.desc()).limit(max_sources * 2).all()
         
         # If no specific matches, get recent records
         if not records:
-            records = db.query(ScientificRecord).order_by(ScientificRecord.id.desc()).limit(max_sources).all()
+            records = db.query(ScientificRecord).order_by(ScientificRecord.id.desc()).limit(max_sources * 2).all()
 
         evidence_items: List[Dict[str, Any]] = []
         for rec in records:
+            # Backend Authorization: Prevent cross-role / out-of-scope record access
+            if not check_record_scope(rec.record_id, active_user):
+                logger.warning(
+                    f"Access Denied: Record {rec.record_id} outside user '{active_user.username}' scope."
+                )
+                continue
+
             # Fetch latest assessment
             assessment = (
                 db.query(ScientificAssessment)
@@ -133,6 +144,7 @@ class InferenceService:
         evidence: Optional[List[Dict[str, Any]]] = None,
         record_id: Optional[str] = None,
         caller_id: str = "research-assistant-ui",
+        user: Optional[UserSession] = None,
     ) -> Dict[str, Any]:
         """
         Executes evidence-grounded inference with strict human governance release checks.
@@ -162,7 +174,7 @@ class InferenceService:
 
         # Invariant 2: Evidence Grounding
         if evidence is None:
-            evidence = self.retrieve_evidence(db, query=question, record_id=record_id)
+            evidence = self.retrieve_evidence(db, query=question, record_id=record_id, user=user)
 
         source_allowlist = [e["source_id"] for e in evidence if "source_id" in e]
 
