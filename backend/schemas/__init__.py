@@ -29,6 +29,12 @@ from backend.schemas.assessment import (
     ScientificAssessmentResponse,
     RecordHistoryResponse,
 )
+from backend.schemas.release import (
+    ModelMetricsSchema,
+    ModelCandidatePayload,
+    ReleaseSignoffRequest,
+    ModelReportResponse,
+)
 
 __all__ = [
     "HealthResponse",
@@ -56,4 +62,8 @@ __all__ = [
     "EvidenceItem",
     "ScientificAssessmentResponse",
     "RecordHistoryResponse",
+    "ModelMetricsSchema",
+    "ModelCandidatePayload",
+    "ReleaseSignoffRequest",
+    "ModelReportResponse",
 ]

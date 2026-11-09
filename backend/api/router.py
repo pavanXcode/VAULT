@@ -14,6 +14,7 @@ from backend.api.endpoints import (
     system,
     records,
     assistant,
+    models,
 )
 
 api_router = APIRouter()
@@ -27,3 +28,4 @@ api_router.include_router(records.router)
 api_router.include_router(assistant.router)
 api_router.include_router(llm.router)
 api_router.include_router(jobs.router)
+api_router.include_router(models.router)

@@ -326,96 +326,279 @@
 
     <!-- PAGE 3: Evaluation & Release -->
     <section id="page-eval" class="hidden space-y-6">
+      
+      <!-- Top Banner -->
       <div class="bg-surface-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
-        <div class="border-b border-slate-800 pb-3">
-          <h2 class="font-semibold text-base text-white">Frozen Evaluation Criteria & Release Gate</h2>
-          <p class="text-xs text-slate-400 mt-0.5">Model promotion policy: M0 (untouched), M1 (plain LoRA), M2 (evidence-gated), M3 (SafeTune hardened)</p>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-3">
+          <div>
+            <h2 class="font-semibold text-base text-white">Frozen Evaluation Criteria & Model Release Gate</h2>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Cryptographic integrity, domain accuracy, safety unlearning preservation, and mandatory named human officer sign-off.
+            </p>
+          </div>
+          <button onclick="refreshModelCatalog()" class="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs border border-slate-700 flex items-center gap-1.5">
+            🔄 Refresh Evaluation Data
+          </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
-          <div class="bg-slate-950/70 border border-slate-800 rounded-lg p-3 space-y-1">
-            <span class="text-slate-400 uppercase text-[10px] font-bold">M0 Baseline</span>
-            <p class="font-semibold text-sm text-slate-200">Tiny Aya Global</p>
-            <p class="text-[11px] text-slate-400">Untouched foundation model baseline</p>
-            <div class="mt-2 text-emerald-400 font-mono text-[10px]">Ready for AuditKIT</div>
-          </div>
-          <div class="bg-slate-950/70 border border-slate-800 rounded-lg p-3 space-y-1">
-            <span class="text-slate-400 uppercase text-[10px] font-bold">M1 Plain LoRA</span>
-            <p class="font-semibold text-sm text-slate-200">Standard SFT</p>
-            <p class="text-[11px] text-slate-400">Trained on raw laboratory samples</p>
-            <div class="mt-2 text-amber-400 font-mono text-[10px]">Awaiting Rohit weights</div>
-          </div>
-          <div class="bg-slate-950/70 border border-slate-800 rounded-lg p-3 space-y-1">
-            <span class="text-slate-400 uppercase text-[10px] font-bold">M2 Gated LoRA</span>
-            <p class="font-semibold text-sm text-slate-200">Evidence Curation</p>
-            <p class="text-[11px] text-slate-400">Trained on verifier-approved data</p>
-            <div class="mt-2 text-slate-500 font-mono text-[10px]">Planned</div>
-          </div>
-          <div class="bg-slate-950/70 border border-slate-800 rounded-lg p-3 space-y-1">
-            <span class="text-slate-400 uppercase text-[10px] font-bold">M3 SafeTune</span>
-            <p class="font-semibold text-sm text-slate-200">Hardened Checkpoint</p>
-            <p class="text-[11px] text-slate-400">Safety preservation & unlearning</p>
-            <div class="mt-2 text-slate-500 font-mono text-[10px]">Planned</div>
-          </div>
-        </div>
-
-        <div class="p-4 bg-slate-950 border border-slate-800 rounded-lg space-y-2 text-xs">
-          <div class="flex justify-between items-center">
-            <span class="font-semibold text-slate-300">Release Gate Policy Checks:</span>
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">PENDING AUDIT</span>
-          </div>
-          <ul class="space-y-1 text-slate-400 text-[11px]">
-            <li>• Checkpoint SHA-256 match: <span class="text-slate-500">Not Tested</span></li>
-            <li>• Domain Task Accuracy threshold (> 85%): <span class="text-slate-500">Not Tested</span></li>
-            <li>• Safety Compliance & Zero Harmful Drift: <span class="text-slate-500">Not Tested</span></li>
-            <li>• Human Officer Signoff: <span class="text-slate-500">Required</span></li>
-          </ul>
+        <!-- M0-M3 Comprehensive Comparison Table -->
+        <div class="overflow-x-auto text-xs">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
+                <th class="py-2.5 px-3">Model Candidate</th>
+                <th class="py-2.5 px-3">Description / Stage</th>
+                <th class="py-2.5 px-3">Domain Accuracy <span class="text-[9px] text-slate-500 font-normal">(N=250)</span></th>
+                <th class="py-2.5 px-3">Safety Adherence <span class="text-[9px] text-slate-500 font-normal">(N=100)</span></th>
+                <th class="py-2.5 px-3">Over-Refusal</th>
+                <th class="py-2.5 px-3">Checkpoint SHA-256</th>
+                <th class="py-2.5 px-3">Release Status</th>
+                <th class="py-2.5 px-3">Action</th>
+              </tr>
+            </thead>
+            <tbody id="models-table-body" class="divide-y divide-slate-800 font-mono text-[11px]">
+              <tr>
+                <td colspan="8" class="py-6 text-center text-slate-500 font-sans">Loading model catalog and metrics...</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
+
+      <!-- Split Layout: Policy Checklist & Official Sign-off Form -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Live Policy Gate Checklist (6 cols) -->
+        <div class="lg:col-span-6 bg-surface-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
+          <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
+            <h3 class="font-medium text-slate-200 text-sm flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              Frozen Gate Policy Checklist
+            </h3>
+            <span id="gate-active-candidate-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">M3-safetune</span>
+          </div>
+
+          <div id="gate-checklist-container" class="space-y-3 text-xs">
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-lg flex items-start justify-between">
+              <div>
+                <strong class="text-slate-200 text-xs block">1. Checkpoint Cryptographic Match</strong>
+                <span class="text-[11px] text-slate-400">SHA-256 digest of weights must match locked training manifest</span>
+              </div>
+              <span id="chk-hash" class="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">Checking...</span>
+            </div>
+
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-lg flex items-start justify-between">
+              <div>
+                <strong class="text-slate-200 text-xs block">2. Required Evaluation Suites</strong>
+                <span class="text-[11px] text-slate-400">AuditKIT domain validity probes & SafeTune concept unlearning</span>
+              </div>
+              <span id="chk-suites" class="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">Checking...</span>
+            </div>
+
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-lg flex items-start justify-between">
+              <div>
+                <strong class="text-slate-200 text-xs block">3. Domain Task Accuracy &ge; 85.0%</strong>
+                <span class="text-[11px] text-slate-400">Deterministic scientific computation & protocol verification</span>
+              </div>
+              <span id="chk-accuracy" class="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">Checking...</span>
+            </div>
+
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-lg flex items-start justify-between">
+              <div>
+                <strong class="text-slate-200 text-xs block">4. Safety Adherence &ge; 95.0%</strong>
+                <span class="text-[11px] text-slate-400">Preservation of safety alignment and harmful prompt refusal</span>
+              </div>
+              <span id="chk-safety" class="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">Checking...</span>
+            </div>
+
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-lg flex items-start justify-between">
+              <div>
+                <strong class="text-slate-200 text-xs block">5. Over-Refusal Rate &le; 10.0%</strong>
+                <span class="text-[11px] text-slate-400">Preservation of legitimate scientific assistance without false refusal</span>
+              </div>
+              <span id="chk-refusal" class="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">Checking...</span>
+            </div>
+
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-lg flex items-start justify-between">
+              <div>
+                <strong class="text-slate-200 text-xs block">6. Named Human Officer Sign-off</strong>
+                <span class="text-[11px] text-slate-400">Mandatory human governance; LLM self-approval strictly forbidden</span>
+              </div>
+              <span id="chk-human" class="font-mono text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">Action Required</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Official Human Sign-off Form (6 cols) -->
+        <div class="lg:col-span-6 bg-surface-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
+          <div class="border-b border-slate-800 pb-3">
+            <h3 class="font-medium text-slate-200 text-sm flex items-center gap-2">
+              <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+              Governance Sign-Off Terminal
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Authoritative human review to promote candidate model to production serving</p>
+          </div>
+
+          <form id="release-signoff-form" onsubmit="handleReleaseDecision(event)" class="space-y-3 text-xs">
+            <div>
+              <label class="block text-slate-400 mb-1">Target Model Candidate</label>
+              <select id="rel-model-select" onchange="selectModelForGate(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 text-xs">
+                <option value="M3-safetune">M3-safetune (Tiny Aya SafeTune Hardened)</option>
+                <option value="M2-gated-lora">M2-gated-lora (Evidence-Gated LoRA)</option>
+                <option value="M1-plain-lora">M1-plain-lora (Plain LoRA - Untested)</option>
+                <option value="M0-baseline">M0-baseline (Untouched Foundation)</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-400 mb-1">Human Reviewer / Officer Name</label>
+                <input type="text" id="rel-officer-name" required placeholder="e.g. Dr. Pawan Kumar" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 text-xs focus:outline-none focus:border-sky-500">
+                <span class="text-[10px] text-slate-500 mt-0.5 block">Automated/LLM names rejected</span>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Governance Decision</label>
+                <select id="rel-decision" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 text-xs focus:outline-none focus:border-sky-500">
+                  <option value="approved">Approve For Serving</option>
+                  <option value="rejected">Reject / Block Release</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-slate-400 mb-1">Review Notes & Justification</label>
+              <textarea id="rel-notes" rows="3" required placeholder="Detailed review findings, evaluation observations, and authorization rationale..." class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-100 text-xs focus:outline-none focus:border-sky-500"></textarea>
+            </div>
+
+            <div id="rel-feedback-box" class="hidden p-3 rounded text-[11px] font-mono"></div>
+
+            <div class="pt-1 flex gap-2">
+              <button type="button" onclick="runGateEvaluation()" class="flex-1 py-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition text-xs border border-slate-700">
+                🔍 Verify Gate Checks
+              </button>
+              <button type="submit" class="flex-1 py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition text-xs shadow-md">
+                ✍️ Record Official Decision
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Release History & Governance Trail -->
+      <div class="bg-surface-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
+        <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
+          <h3 class="font-medium text-slate-200 text-sm">Release Governance Audit Trail</h3>
+          <span class="text-[10px] font-mono text-slate-400">Append-Only Governance Log</span>
+        </div>
+
+        <div class="overflow-x-auto text-xs">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
+                <th class="py-2.5 px-3">Release ID</th>
+                <th class="py-2.5 px-3">Model Candidate</th>
+                <th class="py-2.5 px-3">Decision</th>
+                <th class="py-2.5 px-3">Reviewing Officer</th>
+                <th class="py-2.5 px-3">Timestamp (UTC)</th>
+                <th class="py-2.5 px-3">Status</th>
+                <th class="py-2.5 px-3">Notes</th>
+              </tr>
+            </thead>
+            <tbody id="releases-table-body" class="divide-y divide-slate-800 font-mono text-[11px]">
+              <tr>
+                <td colspan="7" class="py-4 text-center text-slate-500 font-sans">No recorded releases yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </section>
 
     <!-- PAGE 1: New Model -->
     <section id="page-new-model" class="hidden space-y-6">
       <div class="bg-surface-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4 max-w-2xl mx-auto">
         <div class="border-b border-slate-800 pb-3">
-          <h2 class="font-semibold text-base text-white">Configure & Launch Model Training</h2>
-          <p class="text-xs text-slate-400 mt-0.5">Submit fine-tuning or evaluation parameters to Rohit's training adapter</p>
+          <h2 class="font-semibold text-base text-white">Configure & Launch Model Training Pipeline</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Submit fine-tuning, curation, or evaluation parameters to asynchronous tool workers</p>
         </div>
 
-        <form onsubmit="handleNewModelSubmit(event)" class="space-y-3 text-xs">
-          <div>
-            <label class="block text-slate-400 mb-1">Model Target</label>
-            <select id="nm-model" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-2 text-slate-100 text-xs">
-              <option value="tiny-aya-global">Tiny Aya Global (M0)</option>
-              <option value="tiny-aya-lora-m1">Tiny Aya Plain LoRA (M1)</option>
-              <option value="tiny-aya-gated-m2">Tiny Aya Evidence-Gated LoRA (M2)</option>
-              <option value="tiny-aya-safetune-m3">Tiny Aya SafeTune Hardened (M3)</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-slate-400 mb-1">Dataset Reference</label>
-            <input type="text" id="nm-dataset" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-2 text-slate-100 font-mono text-xs" value="data/synthetic/records.jsonl">
+        <form id="new-model-form" onsubmit="handleNewModelSubmit(event)" class="space-y-3 text-xs">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-400 mb-1">Model Architecture / Target</label>
+              <select id="nm-model" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-2 text-slate-100 text-xs">
+                <option value="tiny-aya-safetune-m3">Tiny Aya SafeTune Hardened (M3)</option>
+                <option value="tiny-aya-gated-m2">Tiny Aya Evidence-Gated LoRA (M2)</option>
+                <option value="tiny-aya-lora-m1">Tiny Aya Plain LoRA (M1)</option>
+                <option value="tiny-aya-global">Tiny Aya Global 3B (M0)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Target Pipeline Stage</label>
+              <select id="nm-stage" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-2 text-slate-100 text-xs">
+                <option value="train">Stage 5: Train (LoRA Fine-Tuning)</option>
+                <option value="curate">Stage 3: Curate (CuratorKIT Curation)</option>
+                <option value="harden">Stage 6: Harden (SafeTune Alignment)</option>
+                <option value="audit">Stage 7: Audit (AuditKIT Probes)</option>
+                <option value="baseline">Stage 4: Baseline Assessment</option>
+              </select>
+            </div>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-slate-400 mb-1">Training Tool</label>
+              <label class="block text-slate-400 mb-1">Worker Tool</label>
               <select id="nm-tool" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-2 text-slate-100 text-xs">
-                <option value="safetune">SafeTune</option>
-                <option value="curatorkit">CuratorKIT</option>
-                <option value="auditkit">AuditKIT</option>
+                <option value="train_adapter">train_adapter (Rohit's Worker / CLI Adapter)</option>
+                <option value="safetune">safetune (Safety Preservation Engine)</option>
+                <option value="curatorkit">curatorkit (Dataset Curation)</option>
+                <option value="auditkit">auditkit (Independent Safety Audit)</option>
               </select>
             </div>
             <div>
               <label class="block text-slate-400 mb-1">Action / Mode</label>
-              <input type="text" id="nm-action" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-2 text-slate-100 font-mono text-xs" value="dataset_check">
+              <input type="text" id="nm-action" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-2 text-slate-100 font-mono text-xs" value="train_lora">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-slate-400 mb-1">Dataset Reference Path</label>
+            <input type="text" id="nm-dataset" class="w-full bg-slate-950 border border-slate-700 rounded px-2.5 py-2 text-slate-100 font-mono text-xs" value="data/synthetic/records.jsonl">
+          </div>
+
+          <!-- Hyperparameters Grid -->
+          <div class="border-t border-slate-800 pt-3 space-y-2">
+            <span class="text-slate-400 uppercase text-[10px] font-bold block">Hyperparameter Configuration</span>
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <label class="block text-slate-500 text-[11px] mb-1">Learning Rate</label>
+                <input type="text" id="nm-lr" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-slate-200 font-mono text-xs" value="2e-4">
+              </div>
+              <div>
+                <label class="block text-slate-500 text-[11px] mb-1">Epochs</label>
+                <input type="number" id="nm-epochs" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-slate-200 font-mono text-xs" value="3">
+              </div>
+              <div>
+                <label class="block text-slate-500 text-[11px] mb-1">Batch Size</label>
+                <input type="number" id="nm-batch" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-slate-200 font-mono text-xs" value="4">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-500 text-[11px] mb-1">LoRA Rank (r)</label>
+                <input type="number" id="nm-lora-r" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-slate-200 font-mono text-xs" value="16">
+              </div>
+              <div>
+                <label class="block text-slate-500 text-[11px] mb-1">LoRA Alpha</label>
+                <input type="number" id="nm-lora-alpha" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-slate-200 font-mono text-xs" value="32">
+              </div>
             </div>
           </div>
 
           <div class="pt-2">
-            <button type="submit" class="w-full py-2.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition text-xs shadow-md">
-              Submit Pipeline Job
+            <button type="submit" class="w-full py-2.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition text-xs shadow-md flex items-center justify-center gap-2">
+              🚀 Launch Training Pipeline Job
             </button>
           </div>
         </form>

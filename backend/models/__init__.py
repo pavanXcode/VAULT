@@ -9,6 +9,7 @@ from backend.models.ground_truth import GroundTruthValidation
 from backend.models.job import Job
 from backend.models.record import ScientificRecord
 from backend.models.assessment import ScientificAssessment
+from backend.models.release import ModelRelease
 
 __all__ = [
     "Base",
@@ -18,4 +19,5 @@ __all__ = [
     "Job",
     "ScientificRecord",
     "ScientificAssessment",
+    "ModelRelease",
 ]

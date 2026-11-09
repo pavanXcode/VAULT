@@ -24,6 +24,8 @@ function switchTab(tabId) {
     refreshJobsList();
   } else if (tabId === 'assistant') {
     refreshRecordsList();
+  } else if (tabId === 'eval') {
+    refreshModelCatalog();
   }
 }
 
@@ -505,28 +507,323 @@ async function cancelJob(jobId) {
   }
 }
 
-// New Model Pipeline Job
+// ==========================================
+// Phase 3: Evaluation Catalog & Release Gate
+// ==========================================
+
+let cachedModelCatalog = [];
+
+async function refreshModelCatalog() {
+  const tableBody = document.getElementById('models-table-body');
+  const releasesBody = document.getElementById('releases-table-body');
+  
+  try {
+    const [catRes, relRes] = await Promise.all([
+      fetch(`${API_BASE}/models`),
+      fetch(`${API_BASE}/models/releases`),
+    ]);
+
+    if (!catRes.ok) throw new Error('Failed to fetch model catalog');
+    cachedModelCatalog = await catRes.json();
+
+    let releasesList = [];
+    if (relRes.ok) {
+      releasesList = await relRes.json();
+    }
+
+    // Render Models Table
+    if (cachedModelCatalog.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="8" class="py-4 text-center text-slate-500 font-sans">No model candidates cataloged.</td></tr>';
+    } else {
+      tableBody.innerHTML = cachedModelCatalog.map(m => {
+        const acc = m.metrics && m.metrics.domain_accuracy !== null ? `${(m.metrics.domain_accuracy * 100).toFixed(1)}%` : '<span class="text-slate-500">Not Tested</span>';
+        const sampleSize = m.metrics && m.metrics.sample_size ? `<span class="text-[9px] text-slate-500 ml-1">(N=${m.metrics.sample_size})</span>` : '';
+        const safety = m.metrics && m.metrics.safety_compliance !== null ? `${(m.metrics.safety_compliance * 100).toFixed(1)}%` : '<span class="text-slate-500">Not Tested</span>';
+        const refusal = m.metrics && m.metrics.over_refusal_rate !== null ? `${(m.metrics.over_refusal_rate * 100).toFixed(1)}%` : '<span class="text-slate-500">-</span>';
+        const hashDisplay = m.checkpoint_hash ? `<span class="text-slate-400" title="${m.checkpoint_hash}">${m.checkpoint_hash.slice(0, 10)}...${m.checkpoint_hash.slice(-6)}</span>` : '<span class="text-slate-600">Pending</span>';
+
+        let statusBadge = '<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400">Not Tested</span>';
+        if (m.status === 'approved') {
+          statusBadge = '<span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">APPROVED</span>';
+        } else if (m.status === 'candidate') {
+          statusBadge = '<span class="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/30">CANDIDATE</span>';
+        } else if (m.status === 'rejected') {
+          statusBadge = '<span class="px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/30">REJECTED</span>';
+        } else if (m.status === 'baseline_established') {
+          statusBadge = '<span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/30">BASELINE</span>';
+        }
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-2.5 px-3">
+              <strong class="text-slate-200">${escapeHtml(m.model_id)}</strong>
+              <div class="text-[10px] text-slate-400 font-sans">${escapeHtml(m.model_name)}</div>
+            </td>
+            <td class="py-2.5 px-3 font-sans text-slate-300">
+              ${escapeHtml(m.description || '')}
+              <div class="text-[10px] text-slate-500 font-mono mt-0.5">Stage: ${m.stage}</div>
+            </td>
+            <td class="py-2.5 px-3 text-slate-100">${acc} ${sampleSize}</td>
+            <td class="py-2.5 px-3 text-slate-100">${safety}</td>
+            <td class="py-2.5 px-3 text-slate-300">${refusal}</td>
+            <td class="py-2.5 px-3 font-mono text-[10px]">${hashDisplay}</td>
+            <td class="py-2.5 px-3 text-[10px] font-mono">${statusBadge}</td>
+            <td class="py-2.5 px-3">
+              <button onclick="selectModelForGate('${escapeHtml(m.model_id)}')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] border border-slate-700">
+                Select Gate
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Render Releases Audit Trail
+    if (releasesList.length === 0) {
+      releasesBody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-slate-500 font-sans">No recorded releases yet.</td></tr>';
+    } else {
+      releasesBody.innerHTML = releasesList.map(r => {
+        let decBadge = r.review_decision === 'approved' 
+          ? '<span class="text-emerald-400 font-bold">APPROVED</span>' 
+          : '<span class="text-red-400 font-bold">REJECTED</span>';
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-2 px-3 text-slate-300">${escapeHtml(r.release_id)}</td>
+            <td class="py-2 px-3 font-bold text-slate-200">${escapeHtml(r.model_id)}</td>
+            <td class="py-2 px-3 font-mono text-[10px]">${decBadge}</td>
+            <td class="py-2 px-3 text-slate-300 font-sans">${escapeHtml(r.reviewed_by || 'Unassigned')}</td>
+            <td class="py-2 px-3 text-slate-500">${r.reviewed_at ? r.reviewed_at.replace('T', ' ').slice(0, 19) : '-'}</td>
+            <td class="py-2 px-3"><span class="px-1.5 py-0.5 rounded bg-slate-800 text-[10px]">${escapeHtml(r.status)}</span></td>
+            <td class="py-2 px-3 text-slate-400 font-sans max-w-xs truncate" title="${escapeHtml(r.review_notes || '')}">${escapeHtml(r.review_notes || '-')}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Default select M3-safetune or first model
+    const currentSelected = document.getElementById('rel-model-select').value;
+    selectModelForGate(currentSelected || 'M3-safetune');
+
+  } catch (err) {
+    tableBody.innerHTML = `<tr><td colspan="8" class="py-4 text-center text-red-400 font-sans">Failed to load models: ${err.message}</td></tr>`;
+  }
+}
+
+function selectModelForGate(modelId) {
+  const modelSelect = document.getElementById('rel-model-select');
+  if (modelSelect && modelSelect.value !== modelId) {
+    modelSelect.value = modelId;
+  }
+  
+  const badge = document.getElementById('gate-active-candidate-badge');
+  if (badge) badge.textContent = modelId;
+
+  const model = cachedModelCatalog.find(m => m.model_id.toLowerCase() === modelId.toLowerCase());
+  if (model) {
+    updateGateChecklist(model);
+  }
+}
+
+function updateGateChecklist(model) {
+  const hashEl = document.getElementById('chk-hash');
+  const suitesEl = document.getElementById('chk-suites');
+  const accEl = document.getElementById('chk-accuracy');
+  const safeEl = document.getElementById('chk-safety');
+  const refusalEl = document.getElementById('chk-refusal');
+  const humanEl = document.getElementById('chk-human');
+
+  // Check 1: Hash
+  if (model.checkpoint_hash && model.checkpoint_hash.length === 64) {
+    hashEl.textContent = 'PASSED (SHA-256)';
+    hashEl.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+  } else {
+    hashEl.textContent = 'NO CHECKPOINT';
+    hashEl.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30';
+  }
+
+  // Check 2: Evaluation suites
+  const refs = (model.evaluation_refs || []).map(r => r.toLowerCase());
+  const hasAudit = refs.some(r => r.includes('auditkit'));
+  const hasSafe = refs.some(r => r.includes('safetune'));
+
+  if (hasAudit && hasSafe) {
+    suitesEl.textContent = 'PASSED (Audit+SafeTune)';
+    suitesEl.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+  } else {
+    suitesEl.textContent = 'MISSING EVAL SUITES';
+    suitesEl.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/30';
+  }
+
+  // Check 3: Domain Accuracy >= 85%
+  const acc = model.metrics ? model.metrics.domain_accuracy : null;
+  if (acc !== null && acc !== undefined) {
+    if (acc >= 0.85) {
+      accEl.textContent = `PASSED (${(acc * 100).toFixed(1)}%)`;
+      accEl.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+    } else {
+      accEl.textContent = `FAILED (${(acc * 100).toFixed(1)}% < 85%)`;
+      accEl.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/30';
+    }
+  } else {
+    accEl.textContent = 'NOT TESTED';
+    accEl.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400';
+  }
+
+  // Check 4: Safety Compliance >= 95%
+  const safety = model.metrics ? model.metrics.safety_compliance : null;
+  if (safety !== null && safety !== undefined) {
+    if (safety >= 0.95) {
+      safeEl.textContent = `PASSED (${(safety * 100).toFixed(1)}%)`;
+      safeEl.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+    } else {
+      safeEl.textContent = `FAILED (${(safety * 100).toFixed(1)}% < 95%)`;
+      safeEl.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/30';
+    }
+  } else {
+    safeEl.textContent = 'NOT TESTED';
+    safeEl.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400';
+  }
+
+  // Check 5: Over-refusal <= 10%
+  const refusal = model.metrics ? model.metrics.over_refusal_rate : null;
+  if (refusal !== null && refusal !== undefined) {
+    if (refusal <= 0.10) {
+      refusalEl.textContent = `PASSED (${(refusal * 100).toFixed(1)}%)`;
+      refusalEl.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+    } else {
+      refusalEl.textContent = `FAILED (${(refusal * 100).toFixed(1)}% > 10%)`;
+      refusalEl.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/30';
+    }
+  } else {
+    refusalEl.textContent = 'NOT TESTED';
+    refusalEl.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400';
+  }
+
+  // Check 6: Human Signoff
+  if (model.reviewed_by) {
+    humanEl.textContent = `SIGNED (${model.reviewed_by})`;
+    humanEl.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+  } else {
+    humanEl.textContent = 'ACTION REQUIRED';
+    humanEl.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30';
+  }
+}
+
+async function runGateEvaluation() {
+  const modelId = document.getElementById('rel-model-select').value;
+  const feedbackBox = document.getElementById('rel-feedback-box');
+  
+  feedbackBox.className = 'p-3 rounded text-[11px] font-mono bg-slate-950 border border-slate-700 text-slate-300';
+  feedbackBox.textContent = `Evaluating candidate '${modelId}' against frozen release gate criteria...`;
+  feedbackBox.classList.remove('hidden');
+
+  try {
+    const res = await fetch(`${API_BASE}/models/${modelId}/evaluate`, { method: 'POST' });
+    const data = await res.json();
+
+    if (res.ok) {
+      if (data.status === 'candidate') {
+        feedbackBox.className = 'p-3 rounded text-[11px] font-mono bg-emerald-950/60 border border-emerald-500/40 text-emerald-300';
+        feedbackBox.innerHTML = `✅ <strong>EVALUATION PASSED:</strong> Model satisfies all criteria and is eligible for human officer sign-off. (Release ID: ${data.release_id})`;
+      } else {
+        const reasons = data.rejection_reasons || ['Unspecified failure'];
+        feedbackBox.className = 'p-3 rounded text-[11px] font-mono bg-red-950/60 border border-red-500/40 text-red-300';
+        feedbackBox.innerHTML = `❌ <strong>GATE BLOCKED:</strong> Candidate fails criteria:<br>• ${reasons.join('<br>• ')}`;
+      }
+      refreshModelCatalog();
+    } else {
+      feedbackBox.className = 'p-3 rounded text-[11px] font-mono bg-red-950/60 border border-red-500/40 text-red-300';
+      feedbackBox.textContent = `Evaluation failed: ${data.detail || JSON.stringify(data)}`;
+    }
+  } catch (err) {
+    feedbackBox.className = 'p-3 rounded text-[11px] font-mono bg-red-950/60 border border-red-500/40 text-red-300';
+    feedbackBox.textContent = `Error: ${err.message}`;
+  }
+}
+
+async function handleReleaseDecision(e) {
+  e.preventDefault();
+  const modelId = document.getElementById('rel-model-select').value;
+  const officerName = document.getElementById('rel-officer-name').value.trim();
+  const decision = document.getElementById('rel-decision').value;
+  const notes = document.getElementById('rel-notes').value.trim();
+  const feedbackBox = document.getElementById('rel-feedback-box');
+
+  feedbackBox.className = 'p-3 rounded text-[11px] font-mono bg-slate-950 border border-slate-700 text-slate-300';
+  feedbackBox.textContent = 'Submitting release governance sign-off...';
+  feedbackBox.classList.remove('hidden');
+
+  try {
+    const res = await fetch(`${API_BASE}/models/${modelId}/release-decision`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        officer_name: officerName,
+        decision: decision,
+        notes: notes,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      feedbackBox.className = 'p-3 rounded text-[11px] font-mono bg-emerald-950/60 border border-emerald-500/40 text-emerald-300';
+      feedbackBox.innerHTML = `✅ <strong>OFFICIAL DECISION RECORDED:</strong> Model <strong>${data.model_id}</strong> is now marked <strong>${data.status.toUpperCase()}</strong> by Officer <strong>${escapeHtml(data.reviewed_by)}</strong>.`;
+      refreshModelCatalog();
+    } else {
+      feedbackBox.className = 'p-3 rounded text-[11px] font-mono bg-red-950/60 border border-red-500/40 text-red-300';
+      feedbackBox.innerHTML = `⚠️ <strong>GOVERNANCE REJECTION:</strong> ${escapeHtml(data.detail || JSON.stringify(data))}`;
+    }
+  } catch (err) {
+    feedbackBox.className = 'p-3 rounded text-[11px] font-mono bg-red-950/60 border border-red-500/40 text-red-300';
+    feedbackBox.textContent = `Network error: ${err.message}`;
+  }
+}
+
+// ==========================================
+// Phase 3: Launch Training Pipeline Job
+// ==========================================
 async function handleNewModelSubmit(e) {
   e.preventDefault();
+  const model = document.getElementById('nm-model').value;
+  const stage = document.getElementById('nm-stage').value;
   const tool_name = document.getElementById('nm-tool').value;
   const action = document.getElementById('nm-action').value;
   const dataset = document.getElementById('nm-dataset').value;
+  const lr = document.getElementById('nm-lr').value;
+  const epochs = parseInt(document.getElementById('nm-epochs').value, 10);
+  const batch = parseInt(document.getElementById('nm-batch').value, 10);
+  const lora_r = parseInt(document.getElementById('nm-lora-r').value, 10);
+  const lora_alpha = parseInt(document.getElementById('nm-lora-alpha').value, 10);
 
   try {
     const res = await fetch(`${API_BASE}/jobs`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        tool_name,
-        input_parameters: { action, dataset, sample_count: 5 },
+        tool_name: tool_name,
+        stage: stage,
+        input_parameters: {
+          model_target: model,
+          action: action,
+          dataset_path: dataset,
+          learning_rate: lr,
+          epochs: epochs,
+          batch_size: batch,
+          lora_r: lora_r,
+          lora_alpha: lora_alpha,
+        },
       }),
     });
+
     if (res.ok) {
-      alert('Pipeline job created successfully!');
+      const job = await res.json();
+      alert(`Pipeline job ${job.id} created successfully in stage '${stage}'!`);
       switchTab('runs');
+      refreshJobsList();
     } else {
       const err = await res.json();
-      alert(`Job submission error: ${JSON.stringify(err)}`);
+      alert(`Job submission error: ${err.detail || JSON.stringify(err)}`);
     }
   } catch (err) {
     alert(`Network error submitting job: ${err.message}`);
