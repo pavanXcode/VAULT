@@ -56,14 +56,23 @@ def create_job(
         )
 
     job_id = f"job_{uuid.uuid4().hex[:12]}"
+    import hashlib
+    config_hash = hashlib.sha256(
+        json.dumps(payload.parameters or {}, sort_keys=True).encode("utf-8")
+    ).hexdigest()
 
     job = Job(
         job_id=job_id,
         experiment_id=payload.experiment_id,
         tool_name=payload.tool_name,
+        stage=payload.stage or "train",
         status="pending",
+        config_hash=config_hash,
+        input_artifact_ids=json.dumps(payload.input_artifact_ids or []),
+        output_artifact_ids=json.dumps([]),
         input_parameters=json.dumps(payload.parameters or {}),
         input_reference=payload.input_reference,
+        max_retries=payload.max_retries or 3,
         created_at=datetime.now(timezone.utc),
     )
     db.add(job)
@@ -155,21 +164,81 @@ def get_job_result(
 
     duration = None
     if job.started_at and job.completed_at:
-        duration = round((job.completed_at - job.started_at).total_seconds(), 3)
+        st = job.started_at
+        if st.tzinfo is None:
+            st = st.replace(tzinfo=timezone.utc)
+        ct = job.completed_at
+        if ct.tzinfo is None:
+            ct = ct.replace(tzinfo=timezone.utc)
+        duration = round((ct - st).total_seconds(), 3)
 
     errors = [job.error_message] if job.error_message else []
 
     return JobResultResponse(
         job_id=job.job_id,
         tool_name=job.tool_name,
+        stage=job.stage or "train",
         status=job.status,
-        success=(job.status == "completed"),
+        success=(job.status in ("completed", "succeeded", "not_tested")),
+        config_hash=job.config_hash,
+        input_artifact_ids=job.get_input_artifact_ids(),
+        output_artifact_ids=job.get_output_artifact_ids(),
         output_reference=job.output_reference,
         summary=job.get_result_summary(),
         metrics=job.get_metrics(),
         errors=errors,
+        retry_count=job.retry_count,
+        worker_id=job.worker_id,
+        is_mock=job.is_mock,
         duration_seconds=duration,
     )
+
+
+@router.post(
+    "/{job_id}/retry",
+    response_model=JobResponse,
+    summary="Retry a failed or interrupted job",
+)
+def retry_job(
+    job_id: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Retries an existing failed, cancelled, or interrupted job within bounded limits (max 3).
+    """
+    try:
+        retried_job = ToolExecutionService.retry_job(job_id, db)
+        return JobResponse.model_validate(retried_job)
+    except KeyError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
+    except ValueError as val_err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(val_err),
+        )
+
+
+@router.get(
+    "/{job_id}/events",
+    summary="Get chronological stage events for a job",
+)
+def get_job_events(
+    job_id: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Returns chronological timeline events and stage transitions for a job.
+    """
+    try:
+        return ToolExecutionService.get_job_events(job_id, db)
+    except KeyError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
 
 
 @router.post(

@@ -370,31 +370,129 @@ async function refreshJobsList() {
     const jobs = data.items || data;
 
     if (!jobs || jobs.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-slate-500 font-sans">No pipeline jobs submitted yet.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="py-6 text-center text-slate-500 font-sans">No pipeline jobs submitted yet.</td></tr>';
       return;
     }
 
     tbody.innerHTML = jobs.map(j => {
-      let statusClass = 'text-slate-400 bg-slate-800';
-      if (j.status === 'completed' || j.status === 'succeeded') statusClass = 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20';
-      else if (j.status === 'running') statusClass = 'text-sky-400 bg-sky-500/10 border border-sky-500/20 animate-pulse';
-      else if (j.status === 'failed') statusClass = 'text-red-400 bg-red-500/10 border border-red-500/20';
+      let statusClass = 'text-slate-400 bg-slate-800 border-slate-700';
+      if (j.status === 'completed' || j.status === 'succeeded') {
+        statusClass = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+      } else if (j.status === 'running') {
+        statusClass = 'text-sky-400 bg-sky-500/10 border-sky-500/20 animate-pulse';
+      } else if (j.status === 'not_tested') {
+        statusClass = 'text-purple-400 bg-purple-500/10 border-purple-500/20';
+      } else if (j.status === 'quarantined') {
+        statusClass = 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+      } else if (j.status === 'failed' || j.status === 'interrupted') {
+        statusClass = 'text-red-400 bg-red-500/10 border-red-500/20';
+      }
+
+      const isMockTag = j.is_mock ? '<span class="text-[9px] px-1 py-0.5 rounded bg-purple-900/60 text-purple-300 ml-1">MOCK</span>' : '';
+      const retryTag = `${j.retry_count || 0}/${j.max_retries || 3}`;
+      const hashStr = j.config_hash ? j.config_hash.slice(0, 8) + '...' : '-';
 
       return `
         <tr class="hover:bg-slate-800/50 transition">
-          <td class="py-2.5 px-3 font-semibold text-slate-200">${j.job_id || j.id}</td>
-          <td class="py-2.5 px-3 text-slate-300">${j.tool_name}</td>
-          <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] ${statusClass}">${j.status}</span></td>
-          <td class="py-2.5 px-3 text-slate-500 text-[10px]">${j.created_at ? j.created_at.slice(0, 19) : '-'}</td>
-          <td class="py-2.5 px-3 text-slate-500 text-[10px]">${j.completed_at ? j.completed_at.slice(0, 19) : '-'}</td>
-          <td class="py-2.5 px-3 font-sans">
-            ${j.status === 'running' ? `<button onclick="cancelJob('${j.job_id || j.id}')" class="text-red-400 hover:text-red-300 text-xs">Cancel</button>` : '-'}
+          <td class="py-2.5 px-3 font-semibold text-slate-200">${j.job_id}</td>
+          <td class="py-2.5 px-3 text-slate-300 flex items-center">
+            ${j.tool_name} ${isMockTag}
+          </td>
+          <td class="py-2.5 px-3">
+            <span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300 font-sans uppercase">${j.stage || 'train'}</span>
+          </td>
+          <td class="py-2.5 px-3">
+            <span class="px-2 py-0.5 rounded text-[10px] border ${statusClass}">${j.status}</span>
+          </td>
+          <td class="py-2.5 px-3 text-slate-500 text-[10px]">${hashStr}</td>
+          <td class="py-2.5 px-3 text-slate-400 text-[10px]">${retryTag}</td>
+          <td class="py-2.5 px-3 text-slate-500 text-[10px]">${j.created_at ? j.created_at.slice(0, 19).replace('T', ' ') : '-'}</td>
+          <td class="py-2.5 px-3 font-sans space-x-1">
+            <button onclick="viewJobEvents('${j.job_id}')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs">Events</button>
+            ${(j.status === 'running' || j.status === 'pending') ? `<button onclick="cancelJob('${j.job_id}')" class="px-2 py-0.5 rounded bg-red-950/60 hover:bg-red-900 text-red-300 text-xs border border-red-800/40">Cancel</button>` : ''}
+            ${(j.status === 'failed' || j.status === 'cancelled' || j.status === 'interrupted') && (j.retry_count < (j.max_retries || 3)) ? `<button onclick="retryJob('${j.job_id}')" class="px-2 py-0.5 rounded bg-amber-950/60 hover:bg-amber-900 text-amber-300 text-xs border border-amber-800/40">Retry</button>` : ''}
           </td>
         </tr>
       `;
     }).join('');
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-red-400 font-sans">Error: ${err.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="py-4 text-center text-red-400 font-sans">Error loading jobs: ${err.message}</td></tr>`;
+  }
+}
+
+async function viewJobEvents(jobId) {
+  const modal = document.getElementById('job-events-modal');
+  const title = document.getElementById('job-events-modal-title');
+  const content = document.getElementById('job-events-content');
+
+  title.textContent = `Job Timeline & Diagnostics: ${jobId}`;
+  content.innerHTML = '<div class="text-slate-400 py-3 text-center">Loading stage events and diagnostics...</div>';
+  modal.classList.remove('hidden');
+
+  try {
+    const [eventsRes, resultRes] = await Promise.all([
+      fetch(`${API_BASE}/jobs/${jobId}/events`),
+      fetch(`${API_BASE}/jobs/${jobId}/result`),
+    ]);
+
+    const events = await eventsRes.json();
+    const result = await resultRes.json();
+
+    let eventsHtml = '';
+    if (events && events.length) {
+      eventsHtml = events.map(e => `
+        <div class="p-2.5 rounded bg-slate-950 border border-slate-800 flex justify-between items-start">
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-200 text-xs uppercase">${e.stage}</span>
+              <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">${e.status}</span>
+            </div>
+            <p class="text-slate-300 text-[11px]">${e.message}</p>
+          </div>
+          <span class="text-[10px] font-mono text-slate-500">${e.timestamp ? e.timestamp.slice(11, 19) : ''}</span>
+        </div>
+      `).join('');
+    } else {
+      eventsHtml = '<div class="text-slate-500 py-2">No event records found.</div>';
+    }
+
+    const summaryBlock = `
+      <div class="p-3 rounded bg-slate-950 border border-slate-800 font-mono text-[11px] space-y-1">
+        <div class="flex justify-between">
+          <span class="text-slate-400">Tool: <strong class="text-slate-200">${result.tool_name}</strong></span>
+          <span class="text-slate-400">Worker: <strong class="text-slate-200">${result.worker_id || 'unknown'}</strong></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Stage: <strong class="text-slate-200">${result.stage}</strong></span>
+          <span class="text-slate-400">Duration: <strong class="text-slate-200">${result.duration_seconds ? result.duration_seconds + 's' : '-'}</strong></span>
+        </div>
+        ${result.config_hash ? `<div class="text-slate-500 text-[10px]">Config Hash: ${result.config_hash}</div>` : ''}
+        ${result.errors && result.errors.length ? `<div class="text-red-400 mt-2 p-2 rounded bg-red-950/40 border border-red-500/20">${result.errors.join('<br>')}</div>` : ''}
+        ${result.summary && Object.keys(result.summary).length ? `<div class="text-slate-400 mt-2 pt-2 border-t border-slate-800 text-[10px]">Summary: <pre class="text-slate-300 whitespace-pre-wrap mt-1">${JSON.stringify(result.summary, null, 2)}</pre></div>` : ''}
+      </div>
+    `;
+
+    content.innerHTML = `
+      ${summaryBlock}
+      <h4 class="text-xs uppercase font-semibold text-slate-400 pt-2">Lifecycle Event Trail</h4>
+      ${eventsHtml}
+    `;
+  } catch (err) {
+    content.innerHTML = `<div class="text-red-400 py-2">Failed to load events: ${err.message}</div>`;
+  }
+}
+
+async function retryJob(jobId) {
+  try {
+    const res = await fetch(`${API_BASE}/jobs/${jobId}/retry`, { method: 'POST' });
+    if (res.ok) {
+      refreshJobsList();
+    } else {
+      const err = await res.json();
+      alert(`Retry rejected: ${err.detail || JSON.stringify(err)}`);
+    }
+  } catch (err) {
+    alert(`Failed to retry job: ${err.message}`);
   }
 }
 

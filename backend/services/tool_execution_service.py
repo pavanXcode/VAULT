@@ -215,8 +215,31 @@ class ToolExecutionService:
                 return
 
             # Record outcome
+            job_completed_time = datetime.now(timezone.utc)
+            st = job.started_at
+            if st and st.tzinfo is None:
+                st = st.replace(tzinfo=timezone.utc)
+            duration_s = round((job_completed_time - st).total_seconds(), 2) if st else 0.0
+
+            # Compute and store stage timing
+            current_stage = job.stage or getattr(result, "stage", "train")
+            stage_timings = job.get_stage_timing()
+            stage_timings[current_stage] = {
+                "started_at": job.started_at.isoformat() if job.started_at else None,
+                "completed_at": job_completed_time.isoformat(),
+                "duration_seconds": duration_s,
+            }
+            job.stage_timing = json.dumps(stage_timings)
+            job.worker_id = getattr(result, "worker_id", job.worker_id)
+            job.is_mock = getattr(result, "is_mock", False)
+            if hasattr(result, "output_artifact_ids") and result.output_artifact_ids:
+                job.output_artifact_ids = json.dumps(result.output_artifact_ids)
+            if hasattr(result, "config_hash") and result.config_hash:
+                job.config_hash = result.config_hash
+
             if result.success:
-                job.status = "completed"
+                res_status = getattr(result, "status", "completed")
+                job.status = res_status if res_status in ("not_tested", "quarantined", "succeeded") else "completed"
                 job.output_reference = result.output_reference
                 job.result_summary = json.dumps(result.summary)
                 job.metrics = json.dumps(result.metrics)
@@ -229,7 +252,7 @@ class ToolExecutionService:
                     "\n".join(result.errors) if result.errors else "Tool execution failed."
                 )
 
-            job.completed_at = datetime.now(timezone.utc)
+            job.completed_at = job_completed_time
             db.commit()
 
         except Exception as exc:
@@ -253,3 +276,101 @@ class ToolExecutionService:
             with cls._lock:
                 cls._active_cancel_events.pop(job_id, None)
             db.close()
+
+    @classmethod
+    def retry_job(cls, job_id: str, db: Session, timeout_seconds: float = 300.0) -> Job:
+        """
+        Retries a failed, cancelled, or interrupted job within bounded retry limits (max 3).
+        Honest lifecycle: resets status to 'queued', increments retry_count, and re-executes.
+        """
+        job = db.query(Job).filter(Job.job_id == job_id).first()
+        if not job:
+            raise KeyError(f"Job '{job_id}' not found.")
+
+        if job.status not in ("failed", "cancelled", "interrupted"):
+            raise ValueError(
+                f"Cannot retry job in '{job.status}' status. Only failed, cancelled, or interrupted jobs can be retried."
+            )
+
+        if job.retry_count >= job.max_retries:
+            raise ValueError(
+                f"Bounded retry limit reached: job '{job_id}' has already been retried {job.retry_count}/{job.max_retries} times."
+            )
+
+        job.retry_count += 1
+        job.status = "queued"
+        job.error_message = None
+        job.started_at = None
+        job.completed_at = None
+        db.commit()
+        db.refresh(job)
+
+        # Clear termination sentinel if exists
+        job_dir = cls.get_job_output_dir(job_id)
+        sentinel = job_dir / ".execution_terminated"
+        if sentinel.exists():
+            try:
+                sentinel.unlink()
+            except Exception:
+                pass
+
+        cls.submit_job(
+            job_id=job.job_id,
+            tool_name=job.tool_name,
+            parameters=job.get_input_parameters(),
+            input_reference=job.input_reference,
+            timeout_seconds=timeout_seconds,
+        )
+        return job
+
+    @classmethod
+    def get_job_events(cls, job_id: str, db: Session) -> List[Dict[str, Any]]:
+        """Returns structured chronological lifecycle and stage events for a job."""
+        job = db.query(Job).filter(Job.job_id == job_id).first()
+        if not job:
+            raise KeyError(f"Job '{job_id}' not found.")
+
+        events = []
+        if job.created_at:
+            events.append({
+                "timestamp": job.created_at.isoformat(),
+                "stage": job.stage or "ingest",
+                "status": "queued",
+                "message": f"Job {job.job_id} submitted and placed in execution queue.",
+                "worker_id": job.worker_id,
+            })
+
+        if job.started_at:
+            events.append({
+                "timestamp": job.started_at.isoformat(),
+                "stage": job.stage or "train",
+                "status": "running",
+                "message": f"Worker picked up job {job.job_id} for stage '{job.stage or 'train'}'.",
+                "worker_id": job.worker_id,
+            })
+
+        stage_timings = job.get_stage_timing()
+        for stage_name, timing in stage_timings.items():
+            if timing.get("completed_at"):
+                events.append({
+                    "timestamp": timing["completed_at"],
+                    "stage": stage_name,
+                    "status": job.status,
+                    "message": f"Stage '{stage_name}' completed in {timing.get('duration_seconds', 0)}s.",
+                    "worker_id": job.worker_id,
+                })
+
+        if job.completed_at and job.status != "running":
+            events.append({
+                "timestamp": job.completed_at.isoformat(),
+                "stage": job.stage or "serve",
+                "status": job.status,
+                "message": (
+                    f"Job reached terminal state '{job.status}'. Error: {job.error_message}"
+                    if job.error_message
+                    else f"Job reached terminal state '{job.status}'."
+                ),
+                "worker_id": job.worker_id,
+            })
+
+        return events

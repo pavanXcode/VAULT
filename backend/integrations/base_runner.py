@@ -15,10 +15,16 @@ class ToolRunResult:
 
     tool_name: str
     success: bool
+    stage: str = "train"
+    status: str = "completed"  # completed, succeeded, failed, cancelled, not_tested
     output_reference: Optional[str] = None
+    output_artifact_ids: List[str] = field(default_factory=list)
+    config_hash: Optional[str] = None
     summary: Dict[str, Any] = field(default_factory=dict)
     metrics: Dict[str, Any] = field(default_factory=dict)
     errors: List[str] = field(default_factory=list)
+    worker_id: Optional[str] = None
+    is_mock: bool = False
     stdout: Optional[str] = None
     stderr: Optional[str] = None
 
@@ -26,10 +32,16 @@ class ToolRunResult:
         return {
             "tool_name": self.tool_name,
             "success": self.success,
+            "stage": self.stage,
+            "status": self.status,
             "output_reference": self.output_reference,
+            "output_artifact_ids": self.output_artifact_ids,
+            "config_hash": self.config_hash,
             "summary": self.summary,
             "metrics": self.metrics,
             "errors": self.errors,
+            "worker_id": self.worker_id,
+            "is_mock": self.is_mock,
         }
 
 

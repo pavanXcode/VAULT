@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VAULTJob",
+  "description": "Standardized contract for VAULT pipeline jobs and worker results.",
+  "type": "object",
+  "required": [
+    "job_id",
+    "stage",
+    "status",
+    "config_hash",
+    "input_artifact_ids"
+  ],
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Unique identifier of the pipeline job"
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "ingest",
+        "verify",
+        "curate",
+        "baseline",
+        "train",
+        "harden",
+        "audit",
+        "release",
+        "serve"
+      ],
+      "description": "Current or completed lifecycle stage"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "running",
+        "succeeded",
+        "failed",
+        "cancelled",
+        "not_tested",
+        "quarantined",
+        "interrupted"
+      ],
+      "description": "Truthful state of the job execution"
+    },
+    "config_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 digest of normalized stage configuration parameters"
+    },
+    "input_artifact_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Manifest digests or identifiers of input artifacts consumed"
+    },
+    "output_artifact_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Manifest digests or identifiers of output artifacts produced"
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Verified numerical evaluation or loss metrics produced by this stage"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Human-readable explanation of failure, quarantine, or skip"
+    },
+    "retry_count": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0
+    },
+    "worker_id": {
+      "type": "string",
+      "description": "Identifier of the worker host or GPU process"
+    }
+  },
+  "additionalProperties": true
+}

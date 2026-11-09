@@ -67,6 +67,26 @@ def _sync_sqlite_columns() -> None:
                     if col_name not in existing_cols:
                         conn.execute(text(f"ALTER TABLE ground_truth_validations ADD COLUMN {col_name} {col_def}"))
                         logger.info(f"Added column '{col_name}' to ground_truth_validations")
+
+            # Sync jobs table columns
+            res_jobs = conn.execute(text("PRAGMA table_info(jobs)")).fetchall()
+            existing_jobs_cols = {row[1] for row in res_jobs}
+            if existing_jobs_cols:
+                jobs_cols_to_add = [
+                    ("stage", "VARCHAR(50) DEFAULT 'train'"),
+                    ("config_hash", "VARCHAR(64)"),
+                    ("input_artifact_ids", "TEXT"),
+                    ("output_artifact_ids", "TEXT"),
+                    ("retry_count", "INTEGER DEFAULT 0"),
+                    ("max_retries", "INTEGER DEFAULT 3"),
+                    ("stage_timing", "TEXT"),
+                    ("worker_id", "VARCHAR(128) DEFAULT 'local-cpu-worker'"),
+                    ("is_mock", "BOOLEAN DEFAULT 0"),
+                ]
+                for col_name, col_def in jobs_cols_to_add:
+                    if col_name not in existing_jobs_cols:
+                        conn.execute(text(f"ALTER TABLE jobs ADD COLUMN {col_name} {col_def}"))
+                        logger.info(f"Added column '{col_name}' to jobs")
         except Exception as exc:
             logger.warning(f"SQLite schema sync note: {exc}")
 

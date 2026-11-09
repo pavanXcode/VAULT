@@ -20,6 +20,7 @@ from backend.schemas.job import (
     JobListResponse,
     JobResponse,
     JobResultResponse,
+    JobEvent,
 )
 from backend.schemas.llm import LLMMessage, LLMGenerateRequest, LLMGenerateResponse
 from backend.schemas.record import ScientificRecordInput, ScientificRecordResponse
