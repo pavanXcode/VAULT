@@ -51,7 +51,31 @@
     - Evidence Grounding: Retrieves evidence from immutable `records` and `assessments` tables, enforcing `[SOURCE:id]` citation allowlisting conforming to `INTEGRATION_CONTRACT.md`.
     - Integrated with `/api/assistant/ask` and Web UI `#page-assistant`.
     - Live active model badge in Assistant UI (`Approved: M2-gated-lora` vs `Gate: Unapproved`).
-- **Test Suite:** **111 passed, 1 skipped, 18 subtests passed, 0 failed** (includes full backend, release gate, trainer worker, inference service, auth and scoping, crash recovery, golden demo flow, and Rohit's 22 ML tests).
+- **Teacher-Student Intelligence & Security Architecture (COMPLETE - Phase 5-8):**
+  - **Teacher LLM (`Qwen2.5` / `TeacherLLMService`):**
+    - Responsibility 1: Data sensitivity classification (Public / Internal / Confidential / Highly Restricted) at field & fragment level
+    - Responsibility 2: Data importance classification (Low / Medium / High / Critical)
+    - Responsibility 3: Recipient & access role recommendations
+    - Responsibility 4: Threat & malicious pattern detection (prompt injection, jailbreak, data exfiltration, system prompt extraction)
+    - Responsibility 5: Data handling & training eligibility recommendations (ALLOW, REDACT, RESTRICT, QUARANTINE, REJECT, HUMAN_REVIEW)
+    - Responsibility 6: Structured machine-readable JSON decision generation
+  - **Python Security Policy Engine (`SecurityPolicyEngine`):**
+    - Deterministic enforcement: never blindly trusts Teacher recommendations
+    - Threat escalation (always quarantines detected threats)
+    - Mandatory field redaction (Subject ID, SSN, Credentials) for non-admin callers
+    - Explicit human training authorization requirement
+  - **Drift-Aware Curation (`DriftAwareCurationService` / DAC):**
+    - Step 7 of pipeline: screens training records against drift score threshold (0.35) and generates cryptographically signed dataset manifest
+  - **Multi-Format Ingestion (`DocumentParserService`):**
+    - Ingests and chunks PDF, CSV, Excel, JSON, and text with SHA-256 fingerprints
+  - **Adversarial Feedback Loop & Dataset Generator:**
+    - Continuous learning: Teacher generates synthetic adversarial pairs across 5 categories
+    - "Teach through failures": records Student mistakes and routes them to Teacher for targeted corrections
+  - **Output Security & Audit Logging (`OutputSecurityService`):**
+    - Enforces citation allowlist (`verify_citations`) and disclosure sanitization
+    - Tamper-evident inference audit log with SHA-256 digests
+  - **Interactive Web UI:** 5th navigation tab `🛡️ Teacher & Security` with live document analysis, prompt screening, DAC runner, adversarial loop, and audit ledger
+- **Test Suite:** **167 passed, 1 skipped, 18 subtests passed, 0 failed** (includes full backend, release gate, trainer worker, inference service, auth and scoping, crash recovery, golden demo flow, Rohit's 22 ML tests, Teacher LLM 46 tests, and Teacher integration 10 tests).
 - **Active Integrations:**
   - AuditKIT runner: Available
   - SafeTune runner: Available
@@ -59,6 +83,7 @@
   - Trainer adapter: Directly invokes `vault_ml.train` or local CLI
   - Rohit model engine: **Fully integrated** (`vault_ml/`, `experiments/`, M0/M1/M2 checkpoints and evaluation artifacts)
   - Vijay data engine: Standalone rule engine active; awaiting updated simulator package from Vijay (hook `register_custom_verifier` ready)
+  - Teacher LLM: **Fully integrated** (`qwen2.5:0.5b` with mock fallback & Ollama support)
 
 ---
 

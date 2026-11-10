@@ -6,7 +6,7 @@ const API_BASE = '/api';
 
 // Tab Navigation
 function switchTab(tabId) {
-  ['assistant', 'runs', 'eval', 'new-model'].forEach(id => {
+  ['assistant', 'runs', 'eval', 'new-model', 'security'].forEach(id => {
     const page = document.getElementById(`page-${id}`);
     const tabBtn = document.getElementById(`tab-${id}`);
     if (page && tabBtn) {
@@ -26,6 +26,8 @@ function switchTab(tabId) {
     refreshRecordsList();
   } else if (tabId === 'eval') {
     refreshModelCatalog();
+  } else if (tabId === 'security') {
+    refreshSecurityPanel();
   }
 }
 
@@ -855,6 +857,253 @@ function escapeHtml(text) {
   return text.replace(/[&<>"']/g, m => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
   }[m]));
+}
+
+// ──────────────────────────────────────────────────────────────
+// Teacher & Security Module Logic
+// ──────────────────────────────────────────────────────────────
+
+async function refreshSecurityPanel() {
+  try {
+    // 1. Fetch Teacher status
+    const statusRes = await fetch(`${API_BASE}/security/status`);
+    if (statusRes.ok) {
+      const data = await statusRes.json();
+      document.getElementById('sec-teacher-model').textContent = data.teacher_model || 'qwen2.5:0.5b';
+      document.getElementById('sec-teacher-mode').textContent = data.mode || 'mock';
+      document.getElementById('sec-teacher-endpoint').textContent = data.endpoint || 'http://127.0.0.1:11434';
+      document.getElementById('sec-active-user').textContent = `${data.active_user} (${data.user_role})`;
+    }
+
+    // 2. Fetch Audit logs
+    const auditRes = await fetch(`${API_BASE}/security/audit-logs?limit=15`);
+    if (auditRes.ok) {
+      const logs = await auditRes.json();
+      renderAuditLogs(logs);
+    }
+  } catch (err) {
+    console.warn('Failed to refresh security panel:', err);
+  }
+}
+
+function renderAuditLogs(logs) {
+  const tbody = document.getElementById('sec-audit-tbody');
+  if (!tbody) return;
+
+  if (!logs || logs.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="px-3 py-4 text-center text-slate-500">No inference transactions logged yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = logs.map(l => {
+    let badgeClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+    if (l.final_status === 'rejected_threat') {
+      badgeClass = 'bg-red-500/10 text-red-400 border-red-500/30';
+    } else if (l.final_status === 'redacted_output') {
+      badgeClass = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+    }
+
+    const timeStr = l.timestamp ? new Date(l.timestamp).toLocaleTimeString() : 'N/A';
+    return `
+      <tr class="hover:bg-slate-800/40 border-b border-slate-800/60 font-mono text-[11px]">
+        <td class="px-3 py-2 text-slate-400">${timeStr}</td>
+        <td class="px-3 py-2 text-white font-medium">${escapeHtml(l.audit_id)}</td>
+        <td class="px-3 py-2 text-slate-300">${escapeHtml(l.user_name)} (${escapeHtml(l.user_role)})</td>
+        <td class="px-3 py-2 text-slate-200 truncate max-w-[200px]" title="${escapeHtml(l.prompt)}">${escapeHtml(l.prompt)}</td>
+        <td class="px-3 py-2">
+          <span class="px-2 py-0.5 rounded text-[10px] border ${badgeClass}">
+            ${escapeHtml(l.final_status)}
+          </span>
+        </td>
+        <td class="px-3 py-2 text-slate-500 truncate max-w-[100px]" title="${escapeHtml(l.audit_hash)}">${l.audit_hash.slice(0, 10)}...</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function runTeacherAnalysis() {
+  const content = document.getElementById('sec-content-input').value.trim();
+  const resContainer = document.getElementById('sec-analysis-result');
+  if (!content) {
+    alert('Please enter document content to analyze.');
+    return;
+  }
+
+  resContainer.classList.remove('hidden');
+  resContainer.innerHTML = '<p class="text-slate-400 animate-pulse text-xs">Analyzing with Teacher Qwen & Policy Engine...</p>';
+
+  try {
+    const res = await fetch(`${API_BASE}/security/analyze-data`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: content, explicit_training_authorized: false }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const td = data.teacher_decision;
+      const pe = data.policy_enforcement;
+
+      let sensBadge = 'bg-slate-700 text-slate-300';
+      if (td.sensitivity === 'HIGHLY_RESTRICTED') sensBadge = 'bg-red-500/20 text-red-400 border border-red-500/40';
+      else if (td.sensitivity === 'CONFIDENTIAL') sensBadge = 'bg-amber-500/20 text-amber-400 border border-amber-500/40';
+      else if (td.sensitivity === 'INTERNAL') sensBadge = 'bg-blue-500/20 text-blue-400 border border-blue-500/40';
+
+      let threatBadge = td.threat_detected ?
+        '<span class="px-2 py-0.5 rounded text-xs bg-red-500/20 text-red-400 border border-red-500/40 font-bold">⚠️ THREAT DETECTED</span>' :
+        '<span class="px-2 py-0.5 rounded text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">✅ CLEAN</span>';
+
+      resContainer.innerHTML = `
+        <div class="space-y-3 font-mono text-xs">
+          <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+            <span class="text-slate-400">Teacher Model: <strong>${td.teacher_model}</strong> (${td.mode})</span>
+            <span>${threatBadge}</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div class="bg-slate-900 p-2 rounded border border-slate-800">
+              <span class="text-[10px] text-slate-500 block">SENSITIVITY</span>
+              <span class="px-1.5 py-0.5 rounded text-[11px] ${sensBadge}">${td.sensitivity}</span>
+            </div>
+            <div class="bg-slate-900 p-2 rounded border border-slate-800">
+              <span class="text-[10px] text-slate-500 block">IMPORTANCE</span>
+              <span class="text-white font-bold">${td.importance}</span>
+            </div>
+            <div class="bg-slate-900 p-2 rounded border border-slate-800">
+              <span class="text-[10px] text-slate-500 block">ACTION REC</span>
+              <span class="text-emerald-400 font-bold">${td.recommended_action}</span>
+            </div>
+            <div class="bg-slate-900 p-2 rounded border border-slate-800">
+              <span class="text-[10px] text-slate-500 block">TRAINING ELIGIBILITY</span>
+              <span class="text-cyan-400">${td.training_eligibility}</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/80 p-2.5 rounded border border-slate-800">
+            <span class="text-[10px] text-slate-400 font-bold block mb-1">REASONING & EVIDENCE:</span>
+            <p class="text-slate-300 font-sans text-xs">${escapeHtml(td.reason)}</p>
+          </div>
+
+          <div class="bg-slate-950 p-2.5 rounded border border-emerald-500/30">
+            <span class="text-[10px] text-emerald-400 font-bold block mb-1">PYTHON POLICY ENFORCEMENT:</span>
+            <div class="text-slate-300 space-y-1">
+              <div>Final Action: <strong class="text-white">${pe.final_action}</strong> | Access Granted: <strong>${pe.access_granted}</strong> | Training Authorized: <strong>${pe.training_authorized}</strong></div>
+              ${pe.redacted_fields.length > 0 ? `<div>Redacted Fields: <span class="text-amber-400">${pe.redacted_fields.join(', ')}</span></div>` : ''}
+              ${pe.quarantined ? `<div class="text-red-400">Quarantine Reason: ${pe.quarantine_reason}</div>` : ''}
+              <div class="text-slate-500 text-[10px]">Enforcement Hash: ${pe.enforcement_hash}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      const err = await res.json();
+      resContainer.innerHTML = `<p class="text-red-400 text-xs">Error: ${err.detail || 'Analysis failed'}</p>`;
+    }
+  } catch (err) {
+    resContainer.innerHTML = `<p class="text-red-400 text-xs">Network error: ${err.message}</p>`;
+  }
+}
+
+async function runPromptScan() {
+  const prompt = document.getElementById('sec-prompt-input').value.trim();
+  const resContainer = document.getElementById('sec-prompt-result');
+  if (!prompt) {
+    alert('Please enter a prompt to screen.');
+    return;
+  }
+
+  resContainer.classList.remove('hidden');
+  resContainer.innerHTML = '<p class="text-slate-400 animate-pulse text-xs">Screening prompt with Teacher Qwen...</p>';
+
+  try {
+    const res = await fetch(`${API_BASE}/security/scan-prompt`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const ta = data.teacher_analysis;
+      const pe = data.policy_enforcement;
+
+      let badge = pe.allowed ?
+        '<span class="text-emerald-400 font-bold">ALLOWED</span>' :
+        '<span class="text-red-400 font-bold">BLOCKED / REJECTED</span>';
+
+      resContainer.innerHTML = `
+        <div class="space-y-2 font-mono text-xs">
+          <div class="flex items-center justify-between border-b border-slate-700 pb-1">
+            <span>Decision: ${badge}</span>
+            <span class="text-slate-400">Threat Detected: <strong>${ta.threat_detected}</strong></span>
+          </div>
+          <p class="text-slate-300 font-sans text-xs">Teacher Reason: ${escapeHtml(ta.reason)}</p>
+          ${pe.policy_overrides.length > 0 ? `<p class="text-amber-400 text-[11px]">Policy Overrides: ${pe.policy_overrides.join('; ')}</p>` : ''}
+        </div>
+      `;
+    } else {
+      resContainer.innerHTML = `<p class="text-red-400 text-xs">Prompt screening failed</p>`;
+    }
+  } catch (err) {
+    resContainer.innerHTML = `<p class="text-red-400 text-xs">Network error: ${err.message}</p>`;
+  }
+}
+
+async function triggerDACCuration() {
+  const resContainer = document.getElementById('sec-dac-result');
+  resContainer.classList.remove('hidden');
+  resContainer.innerHTML = '<p class="text-slate-400 animate-pulse text-xs">Running Drift-Aware Curation on records...</p>';
+
+  try {
+    const res = await fetch(`${API_BASE}/security/curate-dac?max_drift_threshold=0.35`, {
+      method: 'POST',
+    });
+
+    if (res.ok) {
+      const rep = await res.json();
+      resContainer.innerHTML = `
+        <div class="space-y-1 font-mono text-xs text-slate-300">
+          <div class="text-emerald-400 font-bold">DAC Curation Complete: ${rep.run_id}</div>
+          <div>Total Evaluated: <strong>${rep.total_evaluated}</strong> | Approved: <strong class="text-emerald-400">${rep.total_approved}</strong> | Rejected: <strong class="text-red-400">${rep.total_rejected}</strong></div>
+          <div>Average Drift Score: <strong>${rep.average_drift_score}</strong></div>
+          <div class="text-slate-500 text-[10px]">Curated Dataset SHA256: ${rep.curated_dataset_hash}</div>
+        </div>
+      `;
+    } else {
+      resContainer.innerHTML = `<p class="text-red-400 text-xs">DAC Curation failed</p>`;
+    }
+  } catch (err) {
+    resContainer.innerHTML = `<p class="text-red-400 text-xs">Network error: ${err.message}</p>`;
+  }
+}
+
+async function triggerAdversarialCycle() {
+  const resContainer = document.getElementById('sec-adv-result');
+  resContainer.classList.remove('hidden');
+  resContainer.innerHTML = '<p class="text-slate-400 animate-pulse text-xs">Executing Teacher-Guided Adversarial Improvement Cycle...</p>';
+
+  try {
+    const res = await fetch(`${API_BASE}/security/adversarial-cycle`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+
+    if (res.ok) {
+      const rep = await res.json();
+      resContainer.innerHTML = `
+        <div class="space-y-1 font-mono text-xs text-slate-300">
+          <div class="text-cyan-400 font-bold">Adversarial Cycle Complete: ${rep.cycle_id}</div>
+          <div>Tests: <strong>${rep.total_tests}</strong> | Passed: <strong class="text-emerald-400">${rep.passed_tests}</strong> | Failed: <strong class="text-amber-400">${rep.failed_tests}</strong> (${rep.pass_rate}% Pass Rate)</div>
+          <div>Teacher-Generated Corrective Training Pairs: <strong class="text-white">${rep.corrected_examples_count}</strong></div>
+        </div>
+      `;
+    } else {
+      resContainer.innerHTML = `<p class="text-red-400 text-xs">Adversarial Cycle failed</p>`;
+    }
+  } catch (err) {
+    resContainer.innerHTML = `<p class="text-red-400 text-xs">Network error: ${err.message}</p>`;
+  }
 }
 
 // Initialize on Load

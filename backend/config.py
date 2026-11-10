@@ -71,6 +71,24 @@ class Settings(BaseSettings):
         description="Timeout for requests to the local LLM inference server",
     )
 
+    # Teacher LLM (Qwen) configuration — separate from Student (Tiny Aya)
+    teacher_llm_mode: str = Field(
+        default="mock",
+        description="Teacher LLM provider mode: 'mock', 'ollama', or 'local_api'",
+    )
+    teacher_llm_endpoint: str = Field(
+        default="http://127.0.0.1:11434",
+        description="Endpoint for Teacher LLM (Qwen) — defaults to Ollama localhost",
+    )
+    teacher_llm_model: str = Field(
+        default="qwen2.5:0.5b",
+        description="Teacher model name (Qwen variant via Ollama)",
+    )
+    teacher_llm_timeout: float = Field(
+        default=60.0,
+        description="Timeout for Teacher LLM requests (seconds)",
+    )
+
     # Logging
     log_level: str = Field(default="INFO", description="Logging level")
     log_format: str = Field(default="json", description="Log format: 'json' or 'text'")

@@ -26,6 +26,8 @@ class ScientificAssessmentResponse(BaseModel):
     review_state: str = Field(default="automated")
     supersedes_id: Optional[str] = None
     timestamp: Optional[str] = None
+    teacher_decision: Optional[Dict[str, Any]] = Field(default=None, description="Teacher LLM classification and threat analysis")
+    policy_enforcement: Optional[Dict[str, Any]] = Field(default=None, description="Python deterministic security enforcement result")
 
 
 class RecordHistoryResponse(BaseModel):

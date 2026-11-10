@@ -22,6 +22,9 @@ from backend.models.record import ScientificRecord
 from backend.models.assessment import ScientificAssessment
 from backend.services.release_gate import release_gate_service
 from backend.services.auth_service import UserSession, check_record_scope, DEFAULT_ANONYMOUS_USER
+from backend.services.teacher_llm_service import get_teacher_service
+from backend.services.security_policy_engine import SecurityPolicyEngine
+from backend.services.output_security import OutputSecurityService
 
 logger = logging.getLogger("vault.inference")
 
@@ -147,8 +150,54 @@ class InferenceService:
         user: Optional[UserSession] = None,
     ) -> Dict[str, Any]:
         """
-        Executes evidence-grounded inference with strict human governance release checks.
+        Executes evidence-grounded inference with Teacher prompt screening,
+        release gate checks, and output security verification.
         """
+        active_user = user or DEFAULT_ANONYMOUS_USER
+
+        # Invariant 0: Teacher LLM — Prompt Security Analysis (Step 13)
+        teacher = get_teacher_service()
+        prompt_analysis = await teacher.analyze_prompt(question, user_role=active_user.role)
+        policy_decision = SecurityPolicyEngine.enforce_prompt_security(prompt_analysis, active_user)
+
+        if not policy_decision["allowed"]:
+            # Threat or disallowed prompt blocked
+            logger.warning(
+                f"Prompt Security Blocked query from user '{active_user.username}': "
+                f"threat={policy_decision.get('threat_detected')}, action={policy_decision.get('final_action')}"
+            )
+            audit_entry = OutputSecurityService.record_audit_entry(
+                user_name=active_user.username,
+                user_role=active_user.role,
+                prompt=question,
+                prompt_threat_detected=policy_decision.get("threat_detected", False),
+                prompt_action=policy_decision.get("final_action", "REJECT"),
+                model_id="GATED_PROMPT_SCREEN",
+                adapter_id=None,
+                cited_sources=[],
+                citations_valid=True,
+                disclosures_blocked=[],
+                final_status="rejected_threat",
+            )
+            return {
+                "success": False,
+                "error": f"Security Policy Violation: {policy_decision.get('reason', 'Threat detected in user prompt.')}",
+                "status": "prompt_threat_rejected",
+                "answer": (
+                    f"🛡️ **Security Policy Enforcement — Request Blocked**\n\n"
+                    f"The Teacher LLM and Python Security Engine flagged this request:\n"
+                    f"- **Threat Detected:** `{policy_decision.get('threat_detected')}`\n"
+                    f"- **Action:** `{policy_decision.get('final_action')}`\n"
+                    f"- **Reason:** {policy_decision.get('reason')}\n\n"
+                    f"Audit reference: `{audit_entry.audit_id}` (Fingerprint: `{audit_entry.audit_hash[:12]}...`)"
+                ),
+                "cited_source_ids": [],
+                "model_id": None,
+                "adapter_id": None,
+                "audit_id": audit_entry.audit_id,
+                "generation_metadata": {"threat_analysis": prompt_analysis, "policy_decision": policy_decision},
+            }
+
         # Invariant 1: Gate Authorization Check
         auth = self.check_serving_authorized(db)
         if not auth["authorized"]:
@@ -172,16 +221,15 @@ class InferenceService:
         model_id = active_release.model_id
         adapter_id = active_release.checkpoint_path or active_release.checkpoint_hash
 
-        # Invariant 2: Evidence Grounding
+        # Invariant 2: Evidence Grounding with Permission-Aware Retrieval (Step 15)
         if evidence is None:
-            evidence = self.retrieve_evidence(db, query=question, record_id=record_id, user=user)
+            evidence = self.retrieve_evidence(db, query=question, record_id=record_id, user=active_user)
 
         source_allowlist = [e["source_id"] for e in evidence if "source_id" in e]
 
-        # Invariant 3: Serialized Model Inference
+        # Invariant 3: Serialized Model Inference (Tiny Aya Student)
         async with _inference_lock:
-            # Try loading real vault_ml engine if GPU / PyTorch models are available
-            answer, metadata, cited = self._run_inference_engine(
+            raw_answer, metadata, cited = self._run_inference_engine(
                 model_id=model_id,
                 adapter_id=adapter_id,
                 question=question,
@@ -189,14 +237,43 @@ class InferenceService:
                 source_allowlist=source_allowlist,
             )
 
+        # Invariant 4: Output Security & Restricted Disclosure Sanitization (Step 17)
+        sanitized_answer, blocked_disclosures = OutputSecurityService.sanitize_output(
+            raw_answer, user_role=active_user.role
+        )
+        citations_valid, valid_citations, hallucinated_citations = OutputSecurityService.verify_citations(
+            sanitized_answer, authorized_source_ids=source_allowlist
+        )
+
+        # Invariant 5: Tamper-Evident Audit Logging (Step 17)
+        audit_entry = OutputSecurityService.record_audit_entry(
+            user_name=active_user.username,
+            user_role=active_user.role,
+            prompt=question,
+            prompt_threat_detected=False,
+            prompt_action="ALLOW",
+            model_id=model_id,
+            adapter_id=adapter_id,
+            cited_sources=valid_citations,
+            citations_valid=citations_valid,
+            disclosures_blocked=blocked_disclosures,
+            final_status="served" if not blocked_disclosures else "redacted_output",
+        )
+
+        metadata["audit_id"] = audit_entry.audit_id
+        metadata["audit_hash"] = audit_entry.audit_hash
+        metadata["disclosures_blocked"] = blocked_disclosures
+        metadata["citations_valid"] = citations_valid
+
         return {
             "success": True,
-            "answer": answer,
+            "answer": sanitized_answer,
             "model_id": model_id,
             "adapter_id": adapter_id,
             "reviewed_by": active_release.reviewed_by,
             "release_id": active_release.release_id,
-            "cited_source_ids": cited,
+            "audit_id": audit_entry.audit_id,
+            "cited_source_ids": valid_citations,
             "evidence": evidence,
             "generation_metadata": metadata,
         }

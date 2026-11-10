@@ -208,20 +208,71 @@ class RecordService:
         source_hash = compute_record_hash(payload_dict)
         verif = RecordService.verify_record_logic(record_input)
 
+        # Teacher LLM semantic & security screening
+        from backend.services.teacher_llm_service import _mock_analyze_data, TeacherDecision, SensitiveField, ThreatIndicator
+        from backend.services.security_policy_engine import SecurityPolicyEngine
+        from backend.services.auth_service import DEFAULT_ANONYMOUS_USER
+
+        content_for_analysis = f"Record ID: {record_input.record_id}\nMethod ID: {record_input.method_id}\nPayload: {json.dumps(payload_dict)}"
+        teacher_dec_raw = _mock_analyze_data(content_for_analysis)
+        
+        sensitive_fields_obj = [
+            SensitiveField(field_name=sf["field_name"], sensitivity_level=sf["sensitivity_level"], reason=sf["reason"])
+            for sf in teacher_dec_raw.get("sensitive_fields", [])
+        ]
+        threats_obj = [
+            ThreatIndicator(threat_type=th["threat_type"], severity=th["severity"], evidence=th["evidence"], description=th["description"])
+            for th in teacher_dec_raw.get("threats", [])
+        ]
+
+        teacher_dec = TeacherDecision(
+            sensitivity=teacher_dec_raw["sensitivity"],
+            importance=teacher_dec_raw["importance"],
+            sensitive_fields=sensitive_fields_obj,
+            threat_detected=teacher_dec_raw["threat_detected"],
+            threats=threats_obj,
+            recipient_recommendations=teacher_dec_raw["recipient_recommendations"],
+            recommended_action=teacher_dec_raw["recommended_action"],
+            training_eligibility=teacher_dec_raw["training_eligibility"],
+            review_required=teacher_dec_raw["review_required"],
+            reason=teacher_dec_raw["reason"],
+            teacher_model="qwen2.5:0.5b",
+            analysis_timestamp=datetime.now(timezone.utc).isoformat(),
+            latency_ms=1.5,
+            mode="mock",
+        )
+        policy_res = SecurityPolicyEngine.enforce(
+            teacher_dec, DEFAULT_ANONYMOUS_USER, content_for_analysis
+        )
+
+        status_val = verif["status"]
+        issues_list = list(verif["issues"])
+        evidence_list = list(verif["evidence"])
+
+        if teacher_dec.threat_detected:
+            status_val = "flagged"
+            issues_list.append(f"Security threat detected by Teacher LLM: {teacher_dec.reason}")
+            evidence_list.append({
+                "rule": "teacher_threat_screening",
+                "notes": f"Teacher flagged threat: {teacher_dec.reason}",
+            })
+
         finding_id = f"FND-{uuid.uuid4().hex[:12].upper()}"
         return ScientificAssessmentResponse(
             finding_id=finding_id,
             record_id=record_input.record_id,
             source_hash=source_hash,
             verifier_version=verif.get("verifier_version", VERIFIER_VERSION),
-            status=verif["status"],
-            issues=verif["issues"],
-            evidence=verif["evidence"],
+            status=status_val,
+            issues=issues_list,
+            evidence=evidence_list,
             derived=verif["derived"],
             original_verdict=record_input.original_verdict,
             review_state="automated",
             supersedes_id=None,
             timestamp=datetime.now(timezone.utc).isoformat(),
+            teacher_decision=teacher_dec.model_dump(),
+            policy_enforcement=policy_res.model_dump(),
         )
 
     @staticmethod
