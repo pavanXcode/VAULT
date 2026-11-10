@@ -31,6 +31,33 @@ def register_custom_verifier(fn: Optional[Callable[[Dict[str, Any]], Dict[str, A
     _custom_verifier_hook = fn
 
 
+def get_vijay_verifier() -> Optional[Callable[[Dict[str, Any]], Dict[str, Any]]]:
+    """Returns an adapter for Vijay's vault.verification.verify_record engine."""
+    try:
+        from vault.verification import verify_record
+        def _adapter(rec_dict: Dict[str, Any]) -> Dict[str, Any]:
+            enriched = dict(rec_dict)
+            if "record_id" in enriched and "experiment_id" not in enriched:
+                enriched["experiment_id"] = enriched["record_id"]
+            if "mass_mg" in enriched and "reported_mass" not in enriched:
+                enriched["reported_mass"] = enriched["mass_mg"]
+            if "volume_l" in enriched and "reported_volume" not in enriched:
+                enriched["reported_volume"] = enriched["volume_l"]
+            if "reported_mg_per_l" in enriched and "measured_value" not in enriched:
+                enriched["measured_value"] = enriched["reported_mg_per_l"]
+            res = verify_record(enriched)
+            return {
+                "status": res["status"],
+                "issues": res["issues"],
+                "evidence": res["evidence"],
+                "derived": res.get("derived", {}),
+                "verifier_version": f"vijay_engine_{res.get('engine_version', '2.0.0')}",
+            }
+        return _adapter
+    except Exception:
+        return None
+
+
 def compute_record_hash(record_dict: Dict[str, Any]) -> str:
     """Computes a canonical SHA-256 digest of record measurements and metadata."""
     canonical = json.dumps(record_dict, sort_keys=True, separators=(",", ":"))

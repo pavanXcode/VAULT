@@ -1,0 +1,13 @@
+{
+  "seed": 42,
+  "sop_clauses": 40,
+  "instruments": 25,
+  "lots": 40,
+  "samples": 150,
+  "experiments": 800,
+  "target_review_scenario_proportion": 0.25,
+  "target_review_scenario_proportion_min": 0.20,
+  "target_review_scenario_proportion_max": 0.25,
+  "target_review_scenario_proportion_range": [0.20, 0.25]
+}
+

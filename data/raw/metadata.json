@@ -1,0 +1,47 @@
+{
+  "seed": 42,
+  "configuration": {
+    "seed": 42,
+    "sop_clauses": 40,
+    "instruments": 25,
+    "lots": 40,
+    "samples": 150,
+    "experiments": 800,
+    "target_review_scenario_proportion": 0.25,
+    "target_review_scenario_proportion_min": 0.2,
+    "target_review_scenario_proportion_max": 0.25,
+    "target_review_scenario_proportion_range": [
+      0.2,
+      0.25
+    ]
+  },
+  "generator_version": "1.0.0",
+  "record_counts": {
+    "sops": 40,
+    "instruments": 25,
+    "lots": 40,
+    "samples": 150,
+    "experiments": 800,
+    "runs_csv": 800
+  },
+  "scenario_family_counts": {
+    "Valid experiments": 600,
+    "Missing evidence": 25,
+    "Calibration expiry": 25,
+    "Expired reagent lot": 25,
+    "Conflicting evidence": 25,
+    "Incorrect SOP version": 25,
+    "Sample holding-time violation": 25,
+    "Measurement outside SOP limits": 25,
+    "Unit conversion": 25
+  },
+  "review_scenario_proportion": 0.25,
+  "content_hashes": {
+    "sops": "0b7f1b4e78fd67d74c49d73e9f8e8da8d0eb6677cf9544b3bcb48cf7622a16d4",
+    "instruments": "73a52112b2def7cb80460da172e2ac675d980da400fe93bc2692c60576727f20",
+    "lots": "5ef2125c3d34b1cdad7ecefcb14048500cbbfc27ac1ee46fa36f968ecbd01e9a",
+    "samples": "b7e47a5aabb1c4675f9f133102c4579466165c1e0aa379e15c023f6350a15dd5",
+    "experiments": "cb39e64076d5fe6f39e3e2d4ac08ad2c49cdf49b633130800e62dc0de517ca1a",
+    "runs_csv": "d154aed6e71bfd75957bd4cd943c7b18d99159925b3336f62de5327f9c9e93dd"
+  }
+}

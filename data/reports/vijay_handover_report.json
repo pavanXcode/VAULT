@@ -1,0 +1,193 @@
+{
+  "handover_metadata": {
+    "developer": "Vijay",
+    "role": "Synthetic Laboratory Data Simulator & Deterministic Ground-Truth Rule Engine Lead",
+    "project": "VAULT - Offline Laboratory Evidence & Validation Platform",
+    "generated_at": "2026-11-05T20:00:00Z",
+    "python_version": "3.11.9",
+    "dependencies": {
+      "pytest": "9.2.0",
+      "jsonschema": "4.26.0"
+    }
+  },
+  "completed_modules": [
+    {
+      "module": "synth/generate.py",
+      "description": "Deterministic laboratory data generator producing SOP clauses, instruments, lots, samples, experiments, and CSV runs spanning 9 scenario families with random.Random(seed)."
+    },
+    {
+      "module": "synth/rules.py",
+      "description": "Five deterministic laboratory validation rules: validate_sop, validate_calibration, validate_lot, validate_holding_time, and validate_measurement."
+    },
+    {
+      "module": "synth/units.py",
+      "description": "Decimal-based unit conversion and measurement uncertainty interval evaluation against SOP specification tolerances."
+    },
+    {
+      "module": "synth/validation.py",
+      "description": "Comprehensive schema, syntax, uniqueness, foreign key, unit, measurement, ledger, and summary validation routines."
+    },
+    {
+      "module": "synth/utils.py",
+      "description": "I/O handlers for JSONL, CSV, configuration loading, and SHA-256 content hashing."
+    },
+    {
+      "module": "scripts/run_simulator.py",
+      "description": "CLI entrypoint for running the simulator and producing data/raw/ datasets."
+    },
+    {
+      "module": "scripts/run_rules.py",
+      "description": "CLI entrypoint for executing all 5 validation rules against experiments and generating data/ground_truth/ground_truth_ledger.jsonl and reports."
+    },
+    {
+      "module": "scripts/validate_dataset.py",
+      "description": "CLI entrypoint for comprehensive dataset and ledger validation."
+    }
+  ],
+  "generated_record_counts": {
+    "sops": 40,
+    "instruments": 25,
+    "lots": 40,
+    "samples": 150,
+    "experiments": 800,
+    "runs_csv": 800,
+    "ground_truth_ledger": 800
+  },
+  "verdict_distribution": {
+    "total_experiments": 800,
+    "valid": {
+      "count": 598,
+      "percentage": 74.75
+    },
+    "invalid": {
+      "count": 130,
+      "percentage": 16.25
+    },
+    "needs_review": {
+      "count": 72,
+      "percentage": 9.0
+    }
+  },
+  "needs_review_percentage": 9.0,
+  "needs_review_gap_analysis": {
+    "target_range": "20.00% - 25.00%",
+    "actual_percentage": 9.0,
+    "actual_count": 72,
+    "policy_note": "Ground-truth verdict labels were determined strictly by the deterministic rule engine without artificial manipulation or label tampering.",
+    "breakdown_of_needs_review_records": {
+      "Missing evidence": 25,
+      "Valid experiments (measurement uncertainty crosses SOP boundary)": 25,
+      "Conflicting evidence (timestamp paradoxes & boundary overlaps)": 12,
+      "Measurement outside SOP limits (boundary overlap)": 3,
+      "Incorrect SOP version (boundary overlap)": 2,
+      "Unit conversion (boundary overlap)": 2,
+      "Calibration expiry (boundary overlap)": 1,
+      "Expired reagent lot (boundary overlap)": 1,
+      "Sample holding-time violation (boundary overlap)": 1
+    },
+    "scenarios_to_adjust_for_higher_proportion": [
+      "Schedule experiment runs during the SOP-003 overlap window (2025-05-15 to 2025-05-31) to trigger SOP_VERSION_CONFLICT.",
+      "Increase proportion of deliberate missing evidence records (e.g. from 25 to 50-60).",
+      "Widen simulated measurement uncertainty intervals on border cases to induce more boundary crossing conditions."
+    ]
+  },
+  "rule_failure_breakdown": {
+    "sop": 71,
+    "calibration": 33,
+    "holding_time": 50,
+    "lot": 25,
+    "measurement": 27
+  },
+  "rule_needs_review_breakdown": {
+    "measurement": 39,
+    "calibration": 9,
+    "holding_time": 17,
+    "lot": 8,
+    "sop": 0
+  },
+  "reason_code_counts": {
+    "SOP_VERSION_INVALID": 71,
+    "HOLDING_TIME_EXCEEDED": 50,
+    "UNCERTAINTY_CROSSES_BOUNDARY": 36,
+    "CALIBRATION_EXPIRED": 33,
+    "MEASUREMENT_OUT_OF_RANGE": 27,
+    "MISSING_REQUIRED_EVIDENCE": 25,
+    "LOT_EXPIRED": 25,
+    "INVALID_TIMESTAMP_ORDER": 9,
+    "UNSUPPORTED_UNIT": 3
+  },
+  "test_results": {
+    "total_tests": 70,
+    "passed": 70,
+    "failed": 0,
+    "duration_seconds": 0.81,
+    "test_suite_files": [
+      "tests/test_sop_rules.py (13 tests)",
+      "tests/test_calibration_rules.py (11 tests)",
+      "tests/test_lot_rules.py (11 tests)",
+      "tests/test_holding_time_rules.py (11 tests)",
+      "tests/test_measurement_rules.py (15 tests)",
+      "tests/test_reproducibility.py (9 tests)"
+    ]
+  },
+  "validation_results": {
+    "overall_valid": true,
+    "total_errors": 0,
+    "total_warnings": 0,
+    "validated_files": {
+      "data/raw/sops_v1.jsonl": "40 records [PASS]",
+      "data/raw/instruments_v1.jsonl": "25 records [PASS]",
+      "data/raw/lots_v1.jsonl": "40 records [PASS]",
+      "data/raw/samples_v1.jsonl": "150 records [PASS]",
+      "data/raw/experiments_v1.jsonl": "800 records [PASS]",
+      "data/raw/runs_v1.csv": "800 rows [PASS]",
+      "data/ground_truth/ground_truth_ledger.jsonl": "800 records [PASS]",
+      "data/reports/ground_truth_summary.json": "Consistent [PASS]"
+    },
+    "validated_integrity_constraints": [
+      "JSONL and CSV syntax compliance",
+      "All required schema fields present across all 6 datasets",
+      "Strict identifier uniqueness (clause_id, instrument_id, lot_id, sample_id, experiment_id)",
+      "Valid ISO-8601 dates (YYYY-MM-DD) and datetimes across all timestamps",
+      "Foreign key referential integrity (100% resolution for Valid experiments; controlled missing/mismatches for review scenarios)",
+      "SOP version consistency and clause mapping",
+      "Measurement units adhere to canonical and recognized laboratory units",
+      "Measurement values are numeric and uncertainty intervals are non-negative",
+      "Ground-truth ledger completeness (exactly 800 records, 1:1 correspondence with experiments)",
+      "Deterministic verdict policy adherence: VALID when all pass, INVALID when failure exists and no review, NEEDS_REVIEW when any review check exists",
+      "Abstention consistency: abstain is True if and only if verdict is needs_review",
+      "Reason codes preserved and matched between check-level outputs and ledger record",
+      "Structured evidence references correctly preserved in every ledger entry"
+    ]
+  },
+  "content_hashes": {
+    "sops": "0b7f1b4e78fd67d74c49d73e9f8e8da8d0eb6677cf9544b3bcb48cf7622a16d4",
+    "instruments": "73a52112b2def7cb80460da172e2ac675d980da400fe93bc2692c60576727f20",
+    "lots": "5ef2125c3d34b1cdad7ecefcb14048500cbbfc27ac1ee46fa36f968ecbd01e9a",
+    "samples": "b7e47a5aabb1c4675f9f133102c4579466165c1e0aa379e15c023f6350a15dd5",
+    "experiments": "cb39e64076d5fe6f39e3e2d4ac08ad2c49cdf49b633130800e62dc0de517ca1a",
+    "runs_csv": "d154aed6e71bfd75957bd4cd943c7b18d99159925b3336f62de5327f9c9e93dd"
+  },
+  "known_limitations": [
+    "Simulator generation with seed 42 yields 9.00% needs_review rather than the 20-25% target because the overlapping SOP-003 window (2025-05-15 to 2025-05-31) was not hit by random experiment run dates.",
+    "The deterministic validation rules require exact catalog lookup; if an instrument or lot is missing from the catalog, it flags MISSING_REQUIRED_EVIDENCE rather than inferring default values.",
+    "Unit conversion in synth/units.py currently targets mass concentration (mg/L canonical); non-concentration parameters (pH, %, NTU, AU, °C) are evaluated directly in their canonical units without scaling."
+  ],
+  "commands_for_running_project": {
+    "run_simulator": "python scripts/run_simulator.py",
+    "run_rules": "python scripts/run_rules.py",
+    "validate_dataset": "python scripts/validate_dataset.py",
+    "run_tests": "python -m pytest tests/ -v"
+  },
+  "handover_guidance": {
+    "for_rohit": {
+      "focus": "Data ingestion, database storage, and evidence indexing pipelines.",
+      "guidance": "1. Ingest raw datasets from data/raw/ into your operational database. 2. The primary foreign keys are clause_id, instrument_id, lot_id, and sample_id. Note that review experiments may contain null foreign keys (Missing evidence) or deliberate mismatches. 3. Read data/ground_truth/ground_truth_ledger.jsonl to access the ground-truth validation status and reason codes for each experiment. 4. Use the evidence array in each ledger record for entity relationship graphing."
+    },
+    "for_pawan": {
+      "focus": "Offline AI/LLM evaluation, agent benchmarking, and guardrail verification.",
+      "guidance": "1. Do NOT allow the LLM to assign or modify ground-truth verdicts. 2. Use data/ground_truth/ground_truth_ledger.jsonl as the strict reference evaluation benchmark. 3. For any experiment where abstain is True (verdict == 'needs_review'), the LLM/agent must abstain or escalate to human review. If the LLM generates a definitive 'valid' or 'invalid' answer on an abstained record, flag it as a benchmark hallucination/failure. 4. Use reason_codes to verify if the LLM's explanation identifies the correct root causes (e.g., CALIBRATION_EXPIRED, HOLDING_TIME_EXCEEDED)."
+    }
+  }
+}
+

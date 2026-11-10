@@ -1,0 +1,25 @@
+{"instrument_id": "INST-001", "instrument_type": "Spectrophotometer", "calibration_date": "2024-10-15", "validity_days": 90, "calibration_status": "EXPIRED"}
+{"instrument_id": "INST-002", "instrument_type": "pH Meter", "calibration_date": "2024-10-22", "validity_days": 90, "calibration_status": "EXPIRED"}
+{"instrument_id": "INST-003", "instrument_type": "Turbidimeter", "calibration_date": "2024-10-29", "validity_days": 90, "calibration_status": "EXPIRED"}
+{"instrument_id": "INST-004", "instrument_type": "Conductivity Meter", "calibration_date": "2024-11-05", "validity_days": 90, "calibration_status": "EXPIRED"}
+{"instrument_id": "INST-005", "instrument_type": "HPLC", "calibration_date": "2024-11-12", "validity_days": 90, "calibration_status": "EXPIRED"}
+{"instrument_id": "INST-006", "instrument_type": "Atomic Absorption Spectrometer", "calibration_date": "2024-11-19", "validity_days": 90, "calibration_status": "EXPIRED"}
+{"instrument_id": "INST-007", "instrument_type": "Gas Chromatograph", "calibration_date": "2024-11-26", "validity_days": 90, "calibration_status": "EXPIRED"}
+{"instrument_id": "INST-008", "instrument_type": "Analytical Balance", "calibration_date": "2024-12-03", "validity_days": 90, "calibration_status": "EXPIRED"}
+{"instrument_id": "INST-009", "instrument_type": "Spectrophotometer", "calibration_date": "2024-12-10", "validity_days": 90, "calibration_status": "EXPIRED"}
+{"instrument_id": "INST-010", "instrument_type": "pH Meter", "calibration_date": "2024-12-17", "validity_days": 90, "calibration_status": "EXPIRED"}
+{"instrument_id": "INST-011", "instrument_type": "Turbidimeter", "calibration_date": "2025-01-05", "validity_days": 180, "calibration_status": "CALIBRATED"}
+{"instrument_id": "INST-012", "instrument_type": "Conductivity Meter", "calibration_date": "2025-01-17", "validity_days": 180, "calibration_status": "CALIBRATED"}
+{"instrument_id": "INST-013", "instrument_type": "HPLC", "calibration_date": "2025-01-29", "validity_days": 180, "calibration_status": "CALIBRATED"}
+{"instrument_id": "INST-014", "instrument_type": "Atomic Absorption Spectrometer", "calibration_date": "2025-02-10", "validity_days": 180, "calibration_status": "CALIBRATED"}
+{"instrument_id": "INST-015", "instrument_type": "Gas Chromatograph", "calibration_date": "2025-02-22", "validity_days": 180, "calibration_status": "CALIBRATED"}
+{"instrument_id": "INST-016", "instrument_type": "Analytical Balance", "calibration_date": "2025-03-06", "validity_days": 180, "calibration_status": "CALIBRATED"}
+{"instrument_id": "INST-017", "instrument_type": "Spectrophotometer", "calibration_date": "2025-03-18", "validity_days": 180, "calibration_status": "CALIBRATED"}
+{"instrument_id": "INST-018", "instrument_type": "pH Meter", "calibration_date": "2025-03-30", "validity_days": 180, "calibration_status": "CALIBRATED"}
+{"instrument_id": "INST-019", "instrument_type": "Turbidimeter", "calibration_date": "2025-01-10", "validity_days": 365, "calibration_status": "CALIBRATED"}
+{"instrument_id": "INST-020", "instrument_type": "Conductivity Meter", "calibration_date": "2025-01-20", "validity_days": 365, "calibration_status": "CALIBRATED"}
+{"instrument_id": "INST-021", "instrument_type": "HPLC", "calibration_date": "2025-01-30", "validity_days": 365, "calibration_status": "CALIBRATED"}
+{"instrument_id": "INST-022", "instrument_type": "Atomic Absorption Spectrometer", "calibration_date": "2025-02-09", "validity_days": 365, "calibration_status": "CALIBRATED"}
+{"instrument_id": "INST-023", "instrument_type": "Gas Chromatograph", "calibration_date": "2025-02-19", "validity_days": 365, "calibration_status": "CALIBRATED"}
+{"instrument_id": "INST-024", "instrument_type": "Analytical Balance", "calibration_date": "2025-03-01", "validity_days": 365, "calibration_status": "CALIBRATED"}
+{"instrument_id": "INST-025", "instrument_type": "Spectrophotometer", "calibration_date": "2025-03-11", "validity_days": 365, "calibration_status": "CALIBRATED"}

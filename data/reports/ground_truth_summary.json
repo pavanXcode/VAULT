@@ -1,0 +1,73 @@
+{
+  "total_experiments": 800,
+  "valid_count": 598,
+  "valid_percentage": 74.75,
+  "invalid_count": 130,
+  "invalid_percentage": 16.25,
+  "needs_review_count": 72,
+  "needs_review_percentage": 9.0,
+  "failure_counts_by_rule": {
+    "sop": 71,
+    "calibration": 33,
+    "holding_time": 50,
+    "lot": 25,
+    "measurement": 27
+  },
+  "needs_review_counts_by_rule": {
+    "measurement": 39,
+    "calibration": 9,
+    "lot": 8,
+    "holding_time": 17
+  },
+  "missing_evidence_experiments": 25,
+  "conflicting_evidence_experiments": 0,
+  "reason_code_counts": {
+    "UNCERTAINTY_CROSSES_BOUNDARY": 36,
+    "SOP_VERSION_INVALID": 71,
+    "MISSING_REQUIRED_EVIDENCE": 25,
+    "CALIBRATION_EXPIRED": 33,
+    "HOLDING_TIME_EXCEEDED": 50,
+    "LOT_EXPIRED": 25,
+    "INVALID_TIMESTAMP_ORDER": 9,
+    "MEASUREMENT_OUT_OF_RANGE": 27,
+    "UNSUPPORTED_UNIT": 3
+  },
+  "scenario_family_distribution": {
+    "Calibration expiry": {
+      "invalid": 24,
+      "needs_review": 1
+    },
+    "Conflicting evidence": {
+      "needs_review": 12,
+      "invalid": 13
+    },
+    "Expired reagent lot": {
+      "invalid": 24,
+      "needs_review": 1
+    },
+    "Incorrect SOP version": {
+      "invalid": 23,
+      "needs_review": 2
+    },
+    "Measurement outside SOP limits": {
+      "invalid": 22,
+      "needs_review": 3
+    },
+    "Missing evidence": {
+      "needs_review": 25
+    },
+    "Sample holding-time violation": {
+      "invalid": 24,
+      "needs_review": 1
+    },
+    "Unit conversion": {
+      "valid": 23,
+      "needs_review": 2
+    },
+    "Valid experiments": {
+      "valid": 575,
+      "needs_review": 25
+    }
+  },
+  "unprocessed_experiments": 0
+}

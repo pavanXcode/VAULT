@@ -1,0 +1,150 @@
+{"sample_id": "SMP-0001", "collected_at": "2025-01-15T08:00:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0002", "collected_at": "2025-01-16T11:17:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0003", "collected_at": "2025-01-18T14:34:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0004", "collected_at": "2025-01-19T09:51:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0005", "collected_at": "2025-01-21T12:08:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0006", "collected_at": "2025-01-23T15:25:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0007", "collected_at": "2025-01-24T10:42:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0008", "collected_at": "2025-01-26T13:59:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0009", "collected_at": "2025-01-27T08:16:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0010", "collected_at": "2025-01-29T11:33:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0011", "collected_at": "2025-01-31T14:50:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0012", "collected_at": "2025-02-01T09:07:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0013", "collected_at": "2025-02-03T12:24:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0014", "collected_at": "2025-02-04T15:41:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0015", "collected_at": "2025-02-06T10:58:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0016", "collected_at": "2025-02-08T13:15:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0017", "collected_at": "2025-02-09T08:32:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0018", "collected_at": "2025-02-11T11:49:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0019", "collected_at": "2025-02-12T14:06:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0020", "collected_at": "2025-02-14T09:23:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0021", "collected_at": "2025-02-16T12:40:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0022", "collected_at": "2025-02-17T15:57:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0023", "collected_at": "2025-02-19T10:14:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0024", "collected_at": "2025-02-20T13:31:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0025", "collected_at": "2025-02-22T08:48:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0026", "collected_at": "2025-02-24T11:05:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0027", "collected_at": "2025-02-25T14:22:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0028", "collected_at": "2025-02-27T09:39:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0029", "collected_at": "2025-02-28T12:56:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0030", "collected_at": "2025-03-02T15:13:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0031", "collected_at": "2025-03-04T10:30:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0032", "collected_at": "2025-03-05T13:47:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0033", "collected_at": "2025-03-07T08:04:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0034", "collected_at": "2025-03-08T11:21:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0035", "collected_at": "2025-03-10T14:38:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0036", "collected_at": "2025-03-12T09:55:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0037", "collected_at": "2025-03-13T12:12:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0038", "collected_at": "2025-03-15T15:29:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0039", "collected_at": "2025-03-16T10:46:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0040", "collected_at": "2025-03-18T13:03:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0041", "collected_at": "2025-03-20T08:20:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0042", "collected_at": "2025-03-21T11:37:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0043", "collected_at": "2025-03-23T14:54:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0044", "collected_at": "2025-03-24T09:11:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0045", "collected_at": "2025-03-26T12:28:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0046", "collected_at": "2025-03-28T15:45:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0047", "collected_at": "2025-03-29T10:02:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0048", "collected_at": "2025-03-31T13:19:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0049", "collected_at": "2025-04-01T08:36:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0050", "collected_at": "2025-04-03T11:53:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0051", "collected_at": "2025-04-05T14:10:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0052", "collected_at": "2025-04-06T09:27:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0053", "collected_at": "2025-04-08T12:44:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0054", "collected_at": "2025-04-09T15:01:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0055", "collected_at": "2025-04-11T10:18:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0056", "collected_at": "2025-04-13T13:35:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0057", "collected_at": "2025-04-14T08:52:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0058", "collected_at": "2025-04-16T11:09:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0059", "collected_at": "2025-04-17T14:26:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0060", "collected_at": "2025-04-19T09:43:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0061", "collected_at": "2025-04-21T12:00:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0062", "collected_at": "2025-04-22T15:17:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0063", "collected_at": "2025-04-24T10:34:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0064", "collected_at": "2025-04-25T13:51:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0065", "collected_at": "2025-04-27T08:08:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0066", "collected_at": "2025-04-29T11:25:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0067", "collected_at": "2025-04-30T14:42:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0068", "collected_at": "2025-05-02T09:59:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0069", "collected_at": "2025-05-03T12:16:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0070", "collected_at": "2025-05-05T15:33:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0071", "collected_at": "2025-05-07T10:50:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0072", "collected_at": "2025-05-08T13:07:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0073", "collected_at": "2025-05-10T08:24:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0074", "collected_at": "2025-05-11T11:41:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0075", "collected_at": "2025-05-13T14:58:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0076", "collected_at": "2025-05-15T09:15:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0077", "collected_at": "2025-05-16T12:32:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0078", "collected_at": "2025-05-18T15:49:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0079", "collected_at": "2025-05-19T10:06:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0080", "collected_at": "2025-05-21T13:23:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0081", "collected_at": "2025-05-23T08:40:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0082", "collected_at": "2025-05-24T11:57:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0083", "collected_at": "2025-05-26T14:14:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0084", "collected_at": "2025-05-27T09:31:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0085", "collected_at": "2025-05-29T12:48:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0086", "collected_at": "2025-05-31T15:05:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0087", "collected_at": "2025-06-01T10:22:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0088", "collected_at": "2025-06-03T13:39:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0089", "collected_at": "2025-06-04T08:56:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0090", "collected_at": "2025-06-06T11:13:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0091", "collected_at": "2025-06-08T14:30:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0092", "collected_at": "2025-06-09T09:47:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0093", "collected_at": "2025-06-11T12:04:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0094", "collected_at": "2025-06-12T15:21:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0095", "collected_at": "2025-06-14T10:38:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0096", "collected_at": "2025-06-16T13:55:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0097", "collected_at": "2025-06-17T08:12:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0098", "collected_at": "2025-06-19T11:29:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0099", "collected_at": "2025-06-20T14:46:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0100", "collected_at": "2025-06-22T09:03:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0101", "collected_at": "2025-06-24T12:20:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0102", "collected_at": "2025-06-25T15:37:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0103", "collected_at": "2025-06-27T10:54:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0104", "collected_at": "2025-06-28T13:11:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0105", "collected_at": "2025-06-30T08:28:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0106", "collected_at": "2025-07-02T11:45:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0107", "collected_at": "2025-07-03T14:02:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0108", "collected_at": "2025-07-05T09:19:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0109", "collected_at": "2025-07-06T12:36:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0110", "collected_at": "2025-07-08T15:53:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0111", "collected_at": "2025-07-10T10:10:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0112", "collected_at": "2025-07-11T13:27:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0113", "collected_at": "2025-07-13T08:44:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0114", "collected_at": "2025-07-14T11:01:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0115", "collected_at": "2025-07-16T14:18:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0116", "collected_at": "2025-07-18T09:35:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0117", "collected_at": "2025-07-19T12:52:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0118", "collected_at": "2025-07-21T15:09:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0119", "collected_at": "2025-07-22T10:26:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0120", "collected_at": "2025-07-24T13:43:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0121", "collected_at": "2025-07-26T08:00:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0122", "collected_at": "2025-07-27T11:17:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0123", "collected_at": "2025-07-29T14:34:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0124", "collected_at": "2025-07-30T09:51:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0125", "collected_at": "2025-08-01T12:08:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0126", "collected_at": "2025-08-03T15:25:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0127", "collected_at": "2025-08-04T10:42:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0128", "collected_at": "2025-08-06T13:59:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0129", "collected_at": "2025-08-07T08:16:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0130", "collected_at": "2025-08-09T11:33:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0131", "collected_at": "2025-08-11T14:50:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0132", "collected_at": "2025-08-12T09:07:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0133", "collected_at": "2025-08-14T12:24:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0134", "collected_at": "2025-08-15T15:41:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0135", "collected_at": "2025-08-17T10:58:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0136", "collected_at": "2025-08-19T13:15:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0137", "collected_at": "2025-08-20T08:32:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0138", "collected_at": "2025-08-22T11:49:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0139", "collected_at": "2025-08-23T14:06:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0140", "collected_at": "2025-08-25T09:23:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0141", "collected_at": "2025-08-27T12:40:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0142", "collected_at": "2025-08-28T15:57:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0143", "collected_at": "2025-08-30T10:14:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0144", "collected_at": "2025-08-31T13:31:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
+{"sample_id": "SMP-0145", "collected_at": "2025-09-02T08:48:00Z", "max_holding_hours": 24, "sample_type": "Purified Water"}
+{"sample_id": "SMP-0146", "collected_at": "2025-09-04T11:05:00Z", "max_holding_hours": 48, "sample_type": "Finished Product Formulation"}
+{"sample_id": "SMP-0147", "collected_at": "2025-09-05T14:22:00Z", "max_holding_hours": 72, "sample_type": "Environmental Groundwater"}
+{"sample_id": "SMP-0148", "collected_at": "2025-09-07T09:39:00Z", "max_holding_hours": 24, "sample_type": "Industrial Effluent"}
+{"sample_id": "SMP-0149", "collected_at": "2025-09-08T12:56:00Z", "max_holding_hours": 48, "sample_type": "Raw Material Assay"}
+{"sample_id": "SMP-0150", "collected_at": "2025-09-10T15:13:00Z", "max_holding_hours": 72, "sample_type": "In-Process Intermediate"}
